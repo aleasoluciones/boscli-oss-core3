@@ -1,0 +1,12 @@
+Source: boscli-oss
+Section: bif
+Priority: extra
+Maintainer: Eduardo Ferro Aldama <eferro@alea-soluciones.com>
+
+Package: boscli-oss
+Architecture: all
+Depends: ${shlibs:Depends}, python
+Description: BOS Command Line Interface
+ BOS Command Line Interface
+ .
+
