@@ -1,3 +1,9 @@
+boscli-oss-core (0.9-1) intrepid; urgency=low
+
+  * Removed extension code
+
+ -- Eduardo Ferro <eferro@hippo>  Sat, 14 Mar 2009 13:02:13 +0100
+
 boscli-oss (0.1.9) stable; urgency=low
 
   * Initial release

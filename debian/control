@@ -1,9 +1,9 @@
-Source: boscli-oss
+Source: boscli-oss-core
 Section: bif
 Priority: extra
 Maintainer: Eduardo Ferro Aldama <eferro@alea-soluciones.com>
 
-Package: boscli-oss
+Package: boscli-oss-core
 Architecture: all
 Depends: ${shlibs:Depends}, python
 Description: BOS Command Line Interface
