@@ -155,8 +155,11 @@ class BiferShell:
         return self.__cliFunctionsManager.get_function_info(function)
 
     def load_extensions(self):
+
         # We process all the python file from the base_path
-        for file_path in os.popen('find %s -name "*.py" -print' % self.base_path).readlines():
+
+        # FIXME don't use find / use python glob or similar
+        for file_path in os.popen('find %s -name "*.py" -print 2>/dev/null' % self.base_path).readlines():
             try:
                 print "Importing %s" % file_path.strip()
                 self.import_cmds_file(file_path.strip())
@@ -697,10 +700,17 @@ Type ?<tab> at the end of a line to see the contextual help for this line
 
     def available_macros(self):
         macros = []
-        for f in os.listdir(self.get_macro_path()):
-            if os.path.isfile(self.get_macro_path() + '/' + f):
-                macros.append(f)
+
+        if os.path.exists(self.get_macro_path()):
+            for f in os.listdir(self.get_macro_path()):
+                if os.path.isfile(self.get_macro_path() + '/' + f):
+                    macros.append(f)
+        else:
+            # No macro dir
+            return []
+
         return macros
+    
 
     def read_macro(self, macro_name):
         return open(self.macro_file_name(macro_name)).readlines()
@@ -760,11 +770,19 @@ def handler(signum, frame):
     if cli != None:
         if cli.executing_command() == True:
             return
-        bcli_exit([])
+        try:
+            bcli_exit([])
+        except NameError:
+            # If there is no a bcli_exit function
+            # defined, end execution
+            # The core lib include a bcli_exit at restrictedmodes.py
+            sys.exit()
+
         get_cli().redisplay()
         readline.redisplay()
     else:
         sys.exit()
+
 
 
 def main():
