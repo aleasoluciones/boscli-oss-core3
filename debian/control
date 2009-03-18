@@ -6,7 +6,7 @@ Maintainer: Eduardo Ferro Aldama <eferro@alea-soluciones.com>
 Package: boscli-oss-core
 Architecture: all
 Depends: ${shlibs:Depends}, python
-Description: BOS Command Line Interface
+Description: BOS Command Line Interface Core
  BOS Command Line Interface
  .
 
