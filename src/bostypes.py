@@ -38,6 +38,7 @@ class BiferShellTypeManager:
             'FILE': BiferShellFile(),
             'CMD': BiferShellCmd(),
             'KERNELVAR': BiferShellKernelVar(),
+            'HEXNUMBER': BiferShellHexNumber(),
         }
     
     def add_type(self, type_name, type_class_instance):
@@ -70,8 +71,9 @@ class BiferShellType:
     def set_cli(self, cli):
         self.cli = cli
         
-    def validate_value(self, Value):
-        return True
+    def validate_value(self, value):
+        res = value in self.values('')
+        return res
     
     def normalize(self, value):
         return value
@@ -269,6 +271,19 @@ class BiferShellCmd(BiferShellType):
             return []
         else:
             functions = self.cli.get_functions()
-            cmds = sorted(list(set([a[0] for a in functions])))
+            cmds = sorted(list(set([a.split('_')[1] for a in functions])))
             return cmds
 
+
+ 
+ 
+class BiferShellHexNumber(BiferShellType):
+    def __init__(self): 
+        BiferShellType.__init__(self, "Hex number value. Ex: FF02FE3A")
+    def validate_value(self, value):
+        try:
+            int(value, 16)
+            return True
+        except:
+            return False
+ 
