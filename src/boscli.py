@@ -21,6 +21,7 @@ import atexit
 import bostypes
 import boscliutils
 import privileges
+import string
 
 try:
     __default_base_path__ = os.environ['BOSCLI_LIB_PATH']
@@ -364,6 +365,19 @@ Type ?<tab> at the end of a line to see the contextual help for this line
     def pager(self):
         return self.__pager
 
+
+    def validate(self, str):
+        """Return str if only contains supported characters.
+        In other cases, print a error msg and raise ValueError.
+        The acepted characters are: letters, numbers and './-_:@'
+        """
+        allchars = string.maketrans('','')
+        if not str.translate(allchars, './-_:@').isalnum():
+            print "Error: Str '%s' contains invalid characters" % str
+            raise ValueError("Str '%s' contains invalid characters" % str)
+        return str
+
+
     def execute(self, function, line, filter):
         """Execute function with the concret info in line 
         """    
@@ -403,7 +417,11 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                     # The output allways is conected with the filter
                     sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
                                     
-                    f(line.split())
+                    try:
+                        f([self.validate(w) for w in line.split()])
+                    except ValueError:
+                        print "Can't be processed."
+
                     if filter != None:
                         self.clear_filter()
 
