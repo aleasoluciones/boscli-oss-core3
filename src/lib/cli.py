@@ -31,7 +31,7 @@ get_cli().add_type('ALIAS', BiferShellAliasType())
 
 
 def bcli_cli(line_words):
-    """Commands for interact with the BosCli himself.
+    """Commands for interact with the BosCli itself.
     """    
     pass
 
