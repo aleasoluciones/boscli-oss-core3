@@ -215,6 +215,17 @@ class BiferShell:
         return self.alias
     ##------------------------------------------------------
     
+    def expand_abbrevs_filter(self, filter_text):
+        expanded_filter = filter_text
+        try:
+            filter_cmd = filter_text.split()[0]
+            match = self.word_complete(filter_cmd, ['include', 'exclude', 'begin'])[0]
+            expanded_filter = expanded_filter.replace(filter_cmd, match)
+        except IndexError:
+            pass
+             
+        return expanded_filter
+
     def expand_abbrevs(self, text):
         expanded_text = ''
         prev_words = []
@@ -319,6 +330,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             parts = line.split('|')
             cmd = parts[0].strip()
             filter = parts[1:][0].strip()
+            filter = self.expand_abbrevs_filter(filter)
         else:
             cmd = line
             
@@ -578,7 +590,9 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         # and continue editing, after show help 
         self.lastline = line
 
-                    
+
+
+#-----------------------------------------
     def complete(self, word_to_complete, state):
         """Return the next possible completion for 'text'.
 
@@ -586,22 +600,53 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         returns None.  The completion should begin with 'text'.
         
         """
+
+        # TODO Refactor
         if state == 0:
-            # Complete the readline actual buffer. This method is call
-            # bye readline library as a "completer" 
             line = readline.get_line_buffer()
+            origline = line
+            try:
+                word_at_point = None
+                if line[readline.get_endidx()] == ' ':
+                    word_at_point = word_to_complete
+                else:
+                    word_at_point = word_to_complete + line[readline.get_endidx():].split()[0]
+            except Exception, ex:
+                word_at_point = None
+                
+            if len(line) > readline.get_endidx():
+                line = line[:readline.get_endidx()]            
+
             if line.find('|') != -1:
                 self.matches = None
                 # FIXME: Check if we are at the right hand of the pipe
                 filter_len = len(line.split('|')[1].split())
                 if filter_len == 0 or (filter_len == 1 and word_to_complete != ''):
-                    self.matches = self.word_complete(word_to_complete, ['include', 'exclude', 'begin'])
+                    self.matches = self.word_complete(word_to_complete,
+                                                      ['include', 
+                                                       'exclude', 
+                                                       'begin', 
+                                                       '|include', 
+                                                       '|exclude', 
+                                                       '|begin', 
+                                                       '| '])
+                    if len(self.matches) == 1:
+                        if word_at_point == self.matches[0]:
+                            # Don't return the same word that already have at point
+                            return None
+                        return self.matches[0] + ' '
+                    elif len(self.matches) > 1:
+                        return self.matches[0]
+                    else:
+                        return None                    
             elif word_to_complete == '':
                 # We are not completing a word
                 # If the actual word is empty the previous are all
                 # the words
                 previous_words = line.split()
                 self.matches = self.next_words(previous_words, '')
+                return self.matches[0]                
+                
             elif word_to_complete.startswith('<'):
                 # We don't complete type values....
                 self.matches = None
@@ -613,21 +658,20 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                     # If the actual word is NOT empty the previous are all
                     # the words minus the actual word
                     previous_words = line.split()[:-1]
-                    if line.strip()[-1] == '?':
-                        self.interactive_help(previous_words, word_to_complete[:-1])
-                        print self.prompt_str() + line.strip(),
-                        return None
-                    self.matches = self.complete_word(previous_words, word_to_complete)            
-        try:
-            if len(self.matches[state]):
-                #If we only have one word we can add a space
-                return self.matches[state] + ' ' 
-            else:
-                return self.matches[state]
-            
-            return self.matches[state]
-        except IndexError:
-            return None
+                    self.matches = self.complete_word(previous_words, word_to_complete)
+
+                    if len(self.matches) == 1:
+                        if word_at_point == self.matches[0]:
+                            # Don't return the same word that already have at point
+                            return None
+                        return self.matches[0] + ' '
+                    return self.matches[0]
+        else: # state != 0. return the corresponding match or None
+            try:
+                match = self.matches[state]
+                return match
+            except IndexError:
+                return None
 
     def redisplay(self):
         line = readline.get_line_buffer()
