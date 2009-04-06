@@ -103,12 +103,9 @@ def get_function_name(function):
 
 def get_function_help(function):
     '''Return all the doc of a function.
-If the function have no doc it return "Not documented yet" and if it is a macro
-return "User macro"
-t'''
-    if function[0] in get_cli().available_macros():
-        # This is a macro name (not a real function
-        return "User macros\n"
+If the function have no doc, it returns "Not documented yet"
+'''
+
     f = globals()[get_function_name(function)]
     doc = f.__doc__
     if doc == None:

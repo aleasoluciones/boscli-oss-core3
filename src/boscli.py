@@ -84,7 +84,6 @@ class BiferShell:
         self.init_readline()
         self.init_history()
         self.base_path = base_path
-        self.macro_path = self.base_path + '/macros/'
         self.completekey = 'tab'
         self.host = os.popen('hostname').read().strip()
             
@@ -102,18 +101,13 @@ class BiferShell:
     def init_commands(self):
         self.functions_files = {}
         self.functions_sintax = []
-        self.macro_start = False
-        self.macro_lines = []
         self.alias = {}
         self.set_prompt()  
         
         # First we import commands defined in this file
         self.import_cmds()
         self.load_extensions()
-        for macro in self.available_macros():
-            l = []
-            l.append(macro)
-            self.functions_sintax.append(l)
+
 
     def add_type(self, type_name, type_class_instance):
         self.type_manager.add_type(type_name, type_class_instance)
@@ -203,25 +197,6 @@ class BiferShell:
     def save_history(self, histfile):
         readline.write_history_file(histfile)
         
-    ## Functions to work with macros ----------------------
-    def get_macro_path(self):
-        return self.macro_path
-    
-    def defining_macro(self):
-        return self.macro_start
-    
-    def start_macro(self):
-        self.macro_start = True
-        self.macro_lines = []
-    
-    def abort_macro(self):
-        self.macro_start = False
-        self.macro_lines = []
-        
-    def get_macro_content(self):
-        return self.macro_lines
-    #------------------------------------------------------
-    
     ## Function to work with aliases ----------------------
     def add_alias(self, alias_name, text):
         self.alias[alias_name] = text
@@ -404,70 +379,53 @@ Type ?<tab> at the end of a line to see the contextual help for this line
 
     def execute(self, function, line, filter):
         """Execute function with the concret info in line 
-        """    
-        
-        if function[0] in self.available_macros():
-            macro_name = function[0]
+        """
+        str_function = '_'.join(function)
+        str_function = "_".join(('bcli', str_function))
+
+        self.in_command_execution = True
+        try:
+            f = globals()[str_function]
             if self.test:
-                print "(test) Macro: '%s'" % (line)
+                print "(test) Cmd: '%s'" % (line)
             else:
-                self.exec_macro(macro_name)
-        else:
-            str_function = '_'.join(function)
-            str_function = "_".join(('bcli', str_function))
+                boscliutils.Log.info("CLI Cmd: '%s'" % line.strip())
 
-            self.in_command_execution = True
-            try:
-                f = globals()[str_function]
-                if self.test:
-                    print "(test) Cmd: '%s'" % (line)
-                else:
-                    boscliutils.Log.info("CLI Cmd: '%s'" % line.strip())
+                # FIXME: Change implementatio for not use global info for filters
 
-                    # FIXME: Change implementatio for not use global info for filters
-                    
-                    out = sys.stdout
+                out = sys.stdout
 
-                    cmd = None
-                    regexp = None
-            
-                    if filter != None: 
-                        if boscliutils.validate_filter(filter):
-                            self.__filter = filter                        
-                            (cmd, regexp) = filter.split()
-                        else:
-                            return
+                cmd = None
+                regexp = None
 
-                    # The output allways is conected with the filter
-                    sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
-                                    
-                    try:
-                        f([self.validate(w) for w in line.split()])
-                    except ValueError:
-                        print "Can't be processed."
+                if filter != None: 
+                    if boscliutils.validate_filter(filter):
+                        self.__filter = filter                        
+                        (cmd, regexp) = filter.split()
+                    else:
+                        return
 
-                    if filter != None:
-                        self.clear_filter()
+                # The output allways is conected with the filter
+                sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
 
-                    sys.stdout = out
-                    
-                    boscliutils.Log.info("CLI Cmd end: '%s'" % line.strip())    
-            except IndexError,e:
-                boscliutils.Log.warning("Error executing CLI Cmd: '%s'" % line.strip())
-                boscliutils.Log.debug("Exception: %s" % e)
-                print e
-            finally:
-                self.in_command_execution = False
+                try:
+                    f([self.validate(w) for w in line.split()])
+                except ValueError:
+                    print "Can't be processed."
+
+                if filter != None:
+                    self.clear_filter()
+
+                sys.stdout = out
+
+                boscliutils.Log.info("CLI Cmd end: '%s'" % line.strip())    
+        except IndexError,e:
+            boscliutils.Log.warning("Error executing CLI Cmd: '%s'" % line.strip())
+            boscliutils.Log.debug("Exception: %s" % e)
+            print e
+        finally:
+            self.in_command_execution = False
         
-    def register_cmd(self, line):
-        words = line.split()
-        if self.macro_start:
-            if len(words) == 3:
-                if words[0] == 'macro' and words[1] == "save":
-                    return
-            self.macro_lines.append(line)
-                    
-    
     def onecmd(self, line):
         if line == 'EOF':
             self.quit()
@@ -477,7 +435,6 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             self.show_help(line[:-1])
             self.lastcommandhelp = True
         else:
-            self.register_cmd(line)
             try:
                 line = line.strip()
                 if line == '':
@@ -758,33 +715,6 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             elif result == '\r':
                 return False
 
-    # Helper functions to work with macros
-    def macro_file_name(self, name):
-        return self.get_macro_path() + '/' + name
-
-    def available_macros(self):
-        macros = []
-
-        if os.path.exists(self.get_macro_path()):
-            for f in os.listdir(self.get_macro_path()):
-                if os.path.isfile(self.get_macro_path() + '/' + f):
-                    macros.append(f)
-        else:
-            # No macro dir
-            return []
-
-        return macros
-    
-
-    def read_macro(self, macro_name):
-        return open(self.macro_file_name(macro_name)).readlines()
-
-    def exec_macro(self, macro_name):
-        print "Executing %s macro" % macro_name
-        self.exec_cmds_file(self.macro_file_name(macro_name))
-
-
-        
     
 def usage():
     usage_msg = """
