@@ -68,6 +68,12 @@ class BiferShell:
             raise RuntimeError("BiferShell is a Singleton. So is ilegal to try to instanciate twice")
         # register singleton instance
         BiferShell.instance = self
+
+        if not sys.stdin.isatty(): # redirected from file or pipe
+            self.__interactive = False
+        else:
+            self.__interactive = True        
+
         self.__cliFunctionsManager = privileges.CliFunctionsManager()
         self.__cliFunctionsManager.init_privileges()
 
@@ -162,7 +168,8 @@ class BiferShell:
         # FIXME don't use find / use python glob or similar
         for file_path in os.popen('find %s -name "*.py" -print 2>/dev/null' % self.base_path).readlines():
             try:
-                print "Importing %s" % file_path.strip()
+                if self.__interactive:
+                    print "Importing %s" % file_path.strip()
                 self.import_cmds_file(file_path.strip())
             except IOError, ex:
                 # If the file is not readable there is no problem
@@ -264,7 +271,10 @@ class BiferShell:
         
     def set_prompt(self):
         """Change the prompt using the host and the mode"""
-        self.prompt = self.prompt_str()
+        if self.__interactive:
+            self.prompt = self.prompt_str()
+        else:
+            self.prompt = ''
         
     def print_wellcome(self):
         """Display wellcome msg"""
@@ -287,14 +297,27 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         print wellcome_msg
         print first_msg
 
+    def pre_input_hook(self):
+        if self.lastcommandhelp:
+            readline.insert_text(self.lastline)
+            readline.redisplay()
+            self.lastcommandhelp = False
+        
     def cmdloop(self, intro=None):
         self.old_completer = readline.get_completer()
         self.old_completer_delims = readline.get_completer_delims()
         readline.set_completer(self.complete)
         readline.parse_and_bind(self.completekey+": complete")
+        readline.parse_and_bind("set bell-style none")
+        readline.parse_and_bind("set show-all-if-ambiguous")
+        readline.parse_and_bind("set completion-query-items -1")
+
+        # If press help key, add the character and accept the line
+        readline.parse_and_bind('"?": "\C-q?\C-j"')
+        # Register a function for execute before read user
+        # input. We can use it for insert text at command line
+        readline.set_pre_input_hook(self.pre_input_hook)
         readline.set_completer_delims(' \t\n')
-        
-        print
         
         try:
             stop = None
@@ -309,6 +332,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         finally:
             readline.set_completer(self.old_completer)
             readline.set_completer_delims(self.old_completer_delims)
+    
     
     def select_execute(self, line):
         """Select the function to execute and return True if we execute the function
@@ -449,6 +473,9 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             self.quit()
         elif line == "" or line.startswith('!'):
             pass
+        elif line[-1] == '?':
+            self.show_help(line[:-1])
+            self.lastcommandhelp = True
         else:
             self.register_cmd(line)
             try:
@@ -473,6 +500,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                 print "..."
             self.default(line)
         return None
+
     
     def postcmd(self, stop, line):
         return stop
@@ -532,8 +560,9 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             
     def quit(self):
         boscliutils.Log.info("Exit boscli")
-        print
-        print "bye"
+        if self.__interactive:
+            print
+            print "bye"
         sys.exit(0)
     
     def get_normalize_func_name(self, f):
@@ -558,7 +587,6 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         if prev_words == [] and partial_word == '':
             # The user need high level help (basic_help)
             basic_help = True
-        
         print
         help_lines = []
         for f in self.get_active_functions():
@@ -570,11 +598,29 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                         help_lines.append(self.get_basic_help_str(f))
                 except IndexError:
                     help_lines.append(self.get_basic_help_str(f))
-        if len(help_lines) > 0:
-            # Some separation to show better the help
-            print 
-        for line in sorted(help_lines):
-            print line
+        if len(help_lines) == 0:
+            print "No help available"
+        else:
+            for line in sorted(help_lines):
+                print line
+
+
+    def show_help(self, line):
+        """Generate help for line specified"""
+        # Check for empty line, and for a space after the last word
+        if line[-1:] == ' ' or line[-1:] == '':
+            # We don't have incomplete_word
+            previous_words = line.split()
+            incomplete_word = ''
+        else:
+            previous_words = line.split()[:-1]
+            incomplete_word = line.split()[-1:][0]            
+
+        self.interactive_help(previous_words, incomplete_word)
+        # Save this line for restore it
+        # and continue editing, after show help 
+        self.lastline = line
+
                     
     def complete(self, word_to_complete, state):
         """Return the next possible completion for 'text'.
