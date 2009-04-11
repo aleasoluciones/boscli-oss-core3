@@ -59,6 +59,7 @@ class CliFunctionsManager:
         except IOError, ex:
             # If we can't read the file ignore it....
             pass
+        self.__functions_access = {}
         self.__functions = {}
 
     def init_privileges(self):
@@ -70,9 +71,24 @@ class CliFunctionsManager:
             # If we can't read the file ignore it....
             pass
 
+    def validate_conf(self):
+        errors = [f for f in self.__functions_access.keys() if f not in self.__functions.keys()]
+        for e in errors:
+            print "Access defined for an inexistent symbol: %s" % e
+
+
+    def execute(self, function, args):
+        str_function = '_'.join(function)
+        f = self.__functions[str_function]
+        f(args)
+
+    def get_function(self, func_name):
+        str_function = '_'.join(func_name)
+        return self.__functions[str_function]
+
     def validate(self, function):
         try:
-            min_priv, mode = self.__functions[function]
+            min_priv, mode = self.__functions_access[function]
 
             # We cosider that a function is accesible if:
             # - We have a privilege level equal or grater
@@ -87,20 +103,27 @@ class CliFunctionsManager:
             return False
         return False
 
-    def append(self, function_name):
-        try:
-            min_priv, mode = self.__functions[function_name]
-            if min_priv != NONE or mode != NORMAL:
-                # FIXME
-                pass
-            else:
-                # FIXME
-                pass
-        except:
-            self.__functions[function_name] = [NONE, NORMAL]
+    
 
-    def set_function_privileges(self,  min_priv, mode, function):        
-        self.__functions[function] = [min_priv, mode]
+    def append(self, function_name, func):
+        
+        # Remove initial word, from functionname (bcli, dynbcli, etc)
+        function_name = '_'.join(function_name.split('_')[1:])
+
+        self.__functions[function_name] = func
+        if not self.__functions_access.has_key(function_name):
+            self.__functions_access[function_name] = [NONE, NORMAL]
+    
+    def remove(self, function_name):        
+        # Remove initial word, from functionname (bcli, dynbcli, etc)
+        function_name = '_'.join(function_name.split('_')[1:])
+        del self.__functions[function_name]
+        del self.__functions_access[function_name]
+
+    def set_function_privileges(self,  min_priv, mode, function):
+        # Remove initial word, from functionname (bcli, dynbcli, etc)
+        function = '_'.join(function.split('_')[1:])
+        self.__functions_access[function] = [min_priv, mode]
         
     def set_privileges(self, priv):
         self.__priv = priv
@@ -113,17 +136,17 @@ class CliFunctionsManager:
     def get_mode(self): return self.__mode
 
     def get_functions(self):
-        funct = self.__functions.keys()
+        funct = self.__functions_access.keys()
         funct.sort()
         return funct
 
     def get_function_info(self, function):
-        return self.__functions[function]
+        return self.__functions_access[function]
 
     def get_active_functions(self):
         funct = []
-        for f in self.__functions.keys():
-            if self.validate(f): funct.append(f.split('_')[1:])
+        for f in self.__functions_access.keys():
+            if self.validate(f): funct.append(f.split('_'))
         funct.sort()
         return funct
 

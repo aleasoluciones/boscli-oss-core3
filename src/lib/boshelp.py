@@ -105,8 +105,7 @@ def get_function_help(function):
     '''Return all the doc of a function.
 If the function have no doc, it returns "Not documented yet"
 '''
-
-    f = globals()[get_function_name(function)]
+    f = get_cli().get_function(function)
     doc = f.__doc__
     if doc == None:
         doc = "Not documented yet\n"

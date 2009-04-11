@@ -51,13 +51,6 @@ class BiferShell:
         return BiferShell.instance
     get_instance = Callable(get_instance)
     
-    mode_prompt = {
-                   None:'>',
-                   'enable':' (enable)#',
-                   'configure':' (configure)#',
-                   'manufacturer':' (manufacturer)#'
-    }
-    
     def __init__(self,
                  base_path,
                  init,
@@ -107,6 +100,9 @@ class BiferShell:
         # First we import commands defined in this file
         self.import_cmds()
         self.load_extensions()
+
+        # Check for problems for symbols loaded
+        self.__cliFunctionsManager.validate_conf()
 
 
     def add_type(self, type_name, type_class_instance):
@@ -343,7 +339,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         match_list = []
 
         similar_match_list = []
-        
+
         # Validate 
         for function in self.get_active_functions():
             if self.match(function, words) == True and \
@@ -357,7 +353,6 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             self.execute(match_list[0], cmd, filter)
             return True
         if len(match_list) > 1:
-            print "Ambiguous command"
             return match_list
         else:
             return similar_match_list
@@ -392,18 +387,13 @@ Type ?<tab> at the end of a line to see the contextual help for this line
     def execute(self, function, line, filter):
         """Execute function with the concret info in line 
         """
-        str_function = '_'.join(function)
-        str_function = "_".join(('bcli', str_function))
-
         self.in_command_execution = True
         try:
-            f = globals()[str_function]
             if self.test:
                 print "(test) Cmd: '%s'" % (line)
             else:
                 boscliutils.Log.info("CLI Cmd: '%s'" % line.strip())
-
-                # FIXME: Change implementatio for not use global info for filters
+                # FIXME: Change implementation for not use global info for filters
 
                 out = sys.stdout
 
@@ -421,9 +411,11 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                 sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
 
                 try:
-                    f([self.validate(w) for w in line.split()])
-                except ValueError:
-                    print "Can't be processed."
+                    # Validate args and execute
+                    args = [self.validate(w) for w in line.split()]
+                    self.__cliFunctionsManager.execute(function, args)
+                except ValueError, ex:
+                    print "Can't be processed. ", ex
 
                 if filter != None:
                     self.clear_filter()
@@ -461,6 +453,9 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                         print "May be you are looking for: "
                         self.interactive_help(line.split(), '')
                         return None
+                    else:
+                        print ret
+                        print "---"
                 # Si no la hemos podido ejecutar decimos que sintaxis desconocida
             except KeyError, ex:
                 print line
@@ -499,6 +494,22 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             raise RuntimeError('%s is not a valid file' % command_file)
         pass
     
+    def add_function(self, symbol_name, symbol):
+        if symbol_name.find('_') == -1 or not symbol_name.split('_')[0] in ['bcli', 'dynbcli']:
+            raise ValueError("'%s' is not a valid boscli func name" % symbol_name)
+        self.functions_sintax.append(symbol_name.split('_')[1:])
+        self.__cliFunctionsManager.append(symbol_name, symbol)
+
+
+    def remove_function(self, symbol_name):
+        self.functions_sintax.remove(symbol_name.split('_')[1:])
+        self.__cliFunctionsManager.remove(symbol_name)
+
+
+    def get_function(self, func_name):
+        return self.__cliFunctionsManager.get_function(func_name)
+        
+
     def import_cmds_file(self, path):
         # TODO: Refactor import_cmds 
         act_symbols = globals().keys()
@@ -507,7 +518,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             if s not in act_symbols and  str(s).startswith('bcli_'):
                 self.functions_files[s] = path
                 self.functions_sintax.append(s.split('_')[1:])
-                self.__cliFunctionsManager.append(s)
+                self.__cliFunctionsManager.append(s, globals()[s])
         
 
     def import_cmds(self):
@@ -516,7 +527,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             if s.startswith('bcli_'):
                 self.functions_files[s] = ''
                 self.functions_sintax.append(s.split('_')[1:])
-                self.__cliFunctionsManager.append(s)
+                self.__cliFunctionsManager.append(s, globals()[s])
 
         
     def run(self):
@@ -535,7 +546,8 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         sys.exit(0)
     
     def get_normalize_func_name(self, f):
-        word_list = get_function_name(f).replace('bcli_','').split('_')
+        func_name = get_function_name(f)
+        word_list = func_name.split('_')[1:]
         final_word_list = []
         for w in word_list:
             if w.isupper(): final_word_list.append('<' + w + '>')
@@ -716,7 +728,6 @@ Type ?<tab> at the end of a line to see the contextual help for this line
     
     def match(self, function, prev_words):
         """Return True if the function match all the prev_words"""
-    
         if len(prev_words) == 0:
             # Of thre is no previous words allways match :)
             return True
