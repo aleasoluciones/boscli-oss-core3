@@ -87,6 +87,10 @@ class BiferShellType:
 class BiferShellString(BiferShellType):
     def __init__(self): 
         BiferShellType.__init__(self, "Sequence of letters, digits or '_'. Ex: Xema")
+    
+    def validate_value(self, value):
+        return True
+    
     def normalize(self, value):
         return value.strip()
     
