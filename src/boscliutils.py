@@ -17,7 +17,6 @@ import logging.handlers
 import subprocess
 import boscli
 import tempfile
-import logging
 import tailer
 import threading,time
 
@@ -47,10 +46,18 @@ class Log:
     def warning(msg):
         logging.warning(msg)
 
+    def error(msg, exception):
+        import traceback
+        logging.error(msg)
+        logging.error(''.join(traceback.format_list(traceback.extract_stack())))
+
+
+
     init = Callable(init)
     debug = Callable(debug)
     info = Callable(info)
     warning = Callable(warning)
+    error = Callable(error)
 
 
 class SOCommand:
@@ -310,7 +317,7 @@ def follow_file(file_name, num_lines = 20):
         signal.signal(signal.SIGINT, handler_sigint)
         signal.signal(signal.SIGTSTP, handler_sigtstp)
 
-
+# FIXME bifer system dep
 def distrib_version():
     # Example:
     # /etc/lsb-release (content)

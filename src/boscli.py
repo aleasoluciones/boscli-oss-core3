@@ -23,12 +23,6 @@ import boscliutils
 import privileges
 import string
 
-try:
-    __default_base_path__ = os.environ['BOSCLI_LIB_PATH']
-except KeyError:
-    __default_base_path__ = 'lib/'
-
-
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
 # Helper class to create static methods (class methods)
@@ -51,11 +45,11 @@ class BiferShell:
         return BiferShell.instance
     get_instance = Callable(get_instance)
     
-    def __init__(self,
-                 base_path,
+    def __init__(self,             
                  init,
                  nopasswd_superuser,
-                 test):         
+                 test,
+                 extensions):         
 
         if BiferShell.instance != None:
             raise RuntimeError("BiferShell is a Singleton. So is ilegal to try to instanciate twice")
@@ -76,9 +70,9 @@ class BiferShell:
         self.type_manager.set_cli(self)
         self.init_readline()
         self.init_history()
-        self.base_path = base_path
         self.completekey = 'tab'
         self.host = os.popen('hostname').read().strip()
+        self.extensions = extensions
             
         if init: self.init_cli()
         self.init_commands()
@@ -152,35 +146,29 @@ class BiferShell:
         return self.__cliFunctionsManager.get_function_info(function)
 
     def load_extensions(self):
+        for ext in self.extensions:
+            if not os.path.isdir(ext):
+                boscliutils.Log.error("'%s' is not a extension dir" % ext, None)
+            boscliutils.Log.debug("'%s' ext dir loading" % ext)
+            for root, dirs, files in os.walk(ext):
+                for file_path in [os.path.join(root, f) for f in files if f.endswith('.py')]:
+                    try:
+                        self.import_cmds_file(file_path.strip())
+                        boscliutils.Log.debug("'%s' imported" % file_path)
+                    except IOError, ex:
+                        boscliutils.Log.warning("Can access to '%s' extension file" % file_path)
+                    except Exception, ex:
+                        module_str = "Module '%s' import error" % os.path.basename(file_path.strip())[:-3]
+                        boscliutils.Log.error(module_str, ex)
 
-        # We process all the python file from the base_path
 
-        # FIXME don't use find / use python glob or similar
-        for file_path in os.popen('find %s -name "*.py" -print 2>/dev/null' % self.base_path).readlines():
-            try:
-                if self.__interactive:
-                    print "Importing %s" % file_path.strip()
-                self.import_cmds_file(file_path.strip())
-            except IOError, ex:
-                # If the file is not readable there is no problem
-                # because this is the only for control the commands
-                # that we can use with this user
-                pass
-            except Exception, ex:
-                print "Module '%s' import error" % os.path.basename(file_path.strip())[:-3]
-                import traceback
-                traceback.print_exc(file=sys.stdout)
- 
-        
-            
     def init_readline(self):
         init_file = os.path.expanduser("~/.cli-init")
         readline.parse_and_bind("set bell-style visible")        
         try:
             readline.read_init_file(init_file)
         except IOError:
-            pass
-        
+            pass        
         
     def init_history(self):
         histfile=os.path.expanduser("~/.cli-history")
@@ -773,7 +761,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
     
 def usage():
     usage_msg = """
-Use mode: cli [OPTIONS]...
+Use mode: cli [OPTIONS] [extdir1 extdir2 ...]
 Open a interfactive Command Line Interface/Interpreter for 
 BiferOperatimSystem. 
 
@@ -794,8 +782,6 @@ mandatory for the correspondient sort option)
   -i, --init 
       this cli is the initial cli (login) so it must display 
       copyright, message of day, etc.
-  -d, --directory = path 
-      base path for extensions commands. Default is /etc/boscli/
   -r, --reference 
       generate the user manual as a html file
 
@@ -843,16 +829,15 @@ def main():
      
     try:
         opts, args = getopt.getopt(sys.argv[1:], \
-                                   "tnhf:id:ra", \
+                                   "tnhf:ir", \
                                    ["test", "nopasswd", "help", "file=", \
-                                    "init", "directory=", "reference"])
+                                    "init", "reference"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     command_file = None
-    base_path = __default_base_path__
     initial_cli =  False
     generate_manual = False
     nopasswd_superuser = False
@@ -867,8 +852,6 @@ def main():
             nopasswd_superuser = True
         elif opt in ("-f", "--file"):
             command_file = os.path.normpath(arg)
-        elif opt in ("-d", "--directory"):
-            base_path = os.path.abspath(os.path.normpath(arg))
         elif opt in ("-i", "--init"):
             initial_cli = True
         elif opt in ("-r", "--reference"):
@@ -880,12 +863,9 @@ def main():
     boscliutils.Log.info("Starting boscli")
 
     # Open new CLI in normal mode
-    cli = BiferShell(base_path, initial_cli, \
-                     nopasswd_superuser, test)
-    if command_file: cli.exec_cmds_file(command_file)
-    
-    
-    
+    cli = BiferShell(initial_cli, \
+                     nopasswd_superuser, test, args)
+    if command_file: cli.exec_cmds_file(command_file)    
     
     if generate_manual:
         import manual
