@@ -1,5 +1,5 @@
-BOS_BIN_DIR=${DESTDIR}/opt/bos/bin
-BCLI_DIR=${DESTDIR}/opt/bos/boscli
+BOS_BIN_DIR=${DESTDIR}/usr/bin/
+BCLI_DIR=${DESTDIR}/usr/lib/boscli/
 
 build:
 	echo "build: Nothing to do"

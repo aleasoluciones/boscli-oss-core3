@@ -1,2 +1,5 @@
 #!/bin/bash
-sudo python /opt/bos/boscli/main.py $*
+
+LIB_DIR=/usr/lib/boscli
+python ${LIB_DIR}/main.py $*
+
