@@ -8,7 +8,7 @@ Homepage: http://oss.alea-soluciones.com/trac/wiki/BoscliOss/
 
 Package: boscli-oss-core
 Architecture: all
-Depends: ${shlibs:Depends}, python 
+Depends: ${shlibs:Depends}, python, tailer
 Suggests: boscli-oss-utils, boscli-oss-system, boscli-oss-asterisk
 Description: extensible command line processor for "ad hoc" shells creation
  The boscli-oss-core is the base infraestructure for creation of "ad hoc"
