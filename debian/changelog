@@ -1,11 +1,6 @@
-boscli-oss-core (0.9-1) intrepid; urgency=low
-
-  * Removed extension code
-
- -- Eduardo Ferro <eferro@alea-soluciones.com>  Sat, 14 Mar 2009 13:02:13 +0100
-
-boscli-oss (0.1.9) stable; urgency=low
+boscli-oss-core (0.1.9-1) unstable; urgency=low
 
   * Initial release
 
- -- Eduardo Ferro <eferro@alea-soluciones.com>  Thu,  6 Nov 2008 20:21:01 +0100
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Tue, 05 May 2009 08:20:05 +0200
+

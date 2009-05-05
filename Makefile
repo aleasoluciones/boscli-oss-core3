@@ -22,3 +22,4 @@ clean:
 	echo "clean: Nothing to do"
 
 
+distclean: clean
