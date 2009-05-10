@@ -1,3 +1,9 @@
+boscli-oss-core (0.1.9-2) unstable; urgency=low
+
+  * Minor cleanup
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Sun, 10 May 2009 22:09:16 +0200
+
 boscli-oss-core (0.1.9-1) unstable; urgency=low
 
   * Initial release
