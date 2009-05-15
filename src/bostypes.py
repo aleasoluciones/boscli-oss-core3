@@ -109,6 +109,8 @@ class BiferShellIp(BiferShellType):
 class BiferShellHost(BiferShellType): 
     def __init__(self): 
         BiferShellType.__init__(self, "Hostname. Ex: www.google.com, bif-shp1")
+    def validate_value(self, value):
+        return True
     
 class BiferShellIpHost(BiferShellType):
     def __init__(self):
