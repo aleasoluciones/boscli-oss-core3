@@ -1,3 +1,9 @@
+boscli-oss-core (0.1.9-4) unstable; urgency=low
+
+  * dummy script for force to use python 2.5
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Wed, 27 May 2009 17:04:03 +0200
+
 boscli-oss-core (0.1.9-3) unstable; urgency=low
 
   * Minor bugfix
