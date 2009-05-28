@@ -50,7 +50,7 @@ class Log:
         import traceback
         logging.error(msg)
         logging.error(''.join(traceback.format_list(traceback.extract_stack())))
-
+        traceback.print_exc()
 
 
     init = Callable(init)
