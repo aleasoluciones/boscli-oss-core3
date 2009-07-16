@@ -145,6 +145,9 @@ class BiferShell:
     def get_function_info(self, function):
         return self.__cliFunctionsManager.get_function_info(function)
 
+    def get_extension_paths(self):
+        return self.extensions
+
     def load_extensions(self):
         for ext in self.extensions:
             if not os.path.isdir(ext):
