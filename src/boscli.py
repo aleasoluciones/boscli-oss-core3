@@ -70,11 +70,16 @@ class BiferShell:
         self.completekey = 'tab'
         self.host = os.popen('hostname').read().strip()
         self.extensions = extensions
+        self.__pager = False
+        self.__exit_functs = []
 
         self.init_commands()
         self.clear_filter()
         self.in_command_execution = False
-        self.__pager = False
+
+
+    def register_exit_funct(self, func):
+         self.__exit_functs.append(func)
 
 
 
@@ -495,9 +500,16 @@ class BiferShell:
             
     def quit(self):
         boscliutils.Log.log("Exit boscli")
+
+        # Execute extensions exit callbacks
+        for f in self.__exit_functs:
+            boscliutils.Log.info("Executing exit funct '%s'" % str(f))
+            f()
+
         if self.__interactive:
             print
             print "bye"
+
         sys.exit(0)
     
     def get_normalize_func_name(self, f):
