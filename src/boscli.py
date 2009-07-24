@@ -22,6 +22,7 @@ import bostypes
 import boscliutils
 import privileges
 import string
+import ConfigParser
 
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
@@ -47,6 +48,7 @@ class BiferShell:
     
     def __init__(self,             
                  name,
+                 confpath,
                  nopasswd_superuser,
                  extensions):         
 
@@ -56,6 +58,16 @@ class BiferShell:
         BiferShell.instance = self
 
         self.__name = name
+        self.__confpath = confpath
+        if self.__confpath != None:
+            config = ConfigParser.ConfigParser()
+            config.read(os.path.expanduser(self.__confpath))
+            print "CONF"
+            print config
+            print "--------"
+
+
+
 
         if not sys.stdin.isatty(): # redirected from file or pipe
             self.__interactive = False
@@ -80,11 +92,8 @@ class BiferShell:
         self.clear_filter()
         self.in_command_execution = False
 
-
     def register_exit_funct(self, func):
          self.__exit_functs.append(func)
-
-
 
     def executing_command(self):
         return self.in_command_execution
@@ -804,12 +813,12 @@ def main():
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTSTP, handler)
     
-    
      
     try:
         opts, args = getopt.getopt(sys.argv[1:], \
-                                   "vdnhf:a:", \
-                                   ["vervose","debug", "nopasswd", "help", "file=", "name"])
+                                   "vdnhf:a:c:", \
+                                   ["vervose","debug", "nopasswd", "help",
+                                    "file=", "name", "conf"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -820,6 +829,7 @@ def main():
     verbose = False
     debug = False
     name = 'boscli-oss'
+    confpath = None
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
@@ -828,6 +838,8 @@ def main():
             verbose = True
         elif opt in ("-a", "--name"):
             name = arg
+        elif opt in ("-c", "--conf"):
+            confpath = arg
         elif opt in ("-d", "--debug-level"):
             debug = True
         elif opt in ("-n", "--nopasswd"):
@@ -844,7 +856,7 @@ def main():
  
 
     # Open new CLI in normal mode
-    cli = BiferShell(name,nopasswd_superuser, args)
+    cli = BiferShell(name, confpath, nopasswd_superuser, args)
     if command_file: cli.exec_cmds_file(command_file)    
     
     boscliutils.Log.info("Entering in interactive mode")
