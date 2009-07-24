@@ -46,9 +46,7 @@ class BiferShell:
     get_instance = Callable(get_instance)
     
     def __init__(self,             
-                 init,
                  nopasswd_superuser,
-                 test,
                  extensions):         
 
         if BiferShell.instance != None:
@@ -65,7 +63,6 @@ class BiferShell:
         self.__cliFunctionsManager.init_privileges()
 
         self.nopasswd_superuser = nopasswd_superuser
-        self.test = test
         self.type_manager = bostypes.BiferShellTypeManager()
         self.type_manager.set_cli(self)
         self.init_readline()
@@ -73,8 +70,7 @@ class BiferShell:
         self.completekey = 'tab'
         self.host = os.popen('hostname').read().strip()
         self.extensions = extensions
-            
-        if init: self.init_cli()
+
         self.init_commands()
         self.clear_filter()
         self.in_command_execution = False
@@ -230,14 +226,7 @@ class BiferShell:
                 expanded_text = expanded_text + ' ' + word
                 prev_words.append(word)
         return expanded_text
-        
-        
-    def init_cli(self):
-        """Display wellcome msg and init some CLI atributtes. Only use for root CLI"""
-        self.version = '0.1'
-        self.author = 'eferro'
-        self.print_wellcome()
-    
+            
     def prompt_str(self):
         context_info = self.__cliFunctionsManager.context_info()
         return '(%s) bcli %s ' % (self.host, context_info)
@@ -249,27 +238,6 @@ class BiferShell:
         else:
             self.prompt = ''
         
-    def print_wellcome(self):
-        """Display wellcome msg"""
-        # Conf and Copyright info
-        name = 'BiferCommandLineInterface (bcli)'
-        init_msg = 'initializing %s ...' % name
-        copyright = 'Copyright (c) 2007 Alea Soluciones'
-        wellcome_msg = '''
-Welcome to %(name)s %(ver)s
-Interactive BiferOperatingSystem adminstration console.
-%(copy)s %(author)s
-        ''' % {'name':name, 'ver':self.version, 'copy':copyright, 'author':self.author}
-        
-        first_msg = """
-For basic help:
-Type h<ret> or help<help> for basic first level help.
-Type ?<tab> at the end of a line to see the contextual help for this line 
-        """
-        print init_msg
-        print wellcome_msg
-        print first_msg
-
     def pre_input_hook(self):
         if self.lastcommandhelp:
             readline.insert_text(self.lastline)
@@ -380,40 +348,37 @@ Type ?<tab> at the end of a line to see the contextual help for this line
         """
         self.in_command_execution = True
         try:
-            if self.test:
-                print "(test) Cmd: '%s'" % (line)
-            else:
-                boscliutils.Log.debug("CLI Cmd: '%s'" % line.strip())
-                # FIXME: Change implementation for not use global info for filters
+            boscliutils.Log.debug("CLI Cmd: '%s'" % line.strip())
+            # FIXME: Change implementation for not use global info for filters
 
-                out = sys.stdout
+            out = sys.stdout
 
-                cmd = None
-                regexp = None
+            cmd = None
+            regexp = None
 
-                if filter != None: 
-                    if boscliutils.validate_filter(filter):
-                        self.__filter = filter                        
-                        (cmd, regexp) = filter.split()
-                    else:
-                        return
+            if filter != None: 
+                if boscliutils.validate_filter(filter):
+                    self.__filter = filter                        
+                    (cmd, regexp) = filter.split()
+                else:
+                    return
 
-                # The output allways is conected with the filter
-                sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
+            # The output allways is conected with the filter
+            sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
 
-                try:
-                    # Validate args and execute
-                    args = [self.validate(w) for w in line.split()]
-                    self.__cliFunctionsManager.execute(function, args)
-                except ValueError, ex:
-                    print "Can't be processed. ", ex
+            try:
+                # Validate args and execute
+                args = [self.validate(w) for w in line.split()]
+                self.__cliFunctionsManager.execute(function, args)
+            except ValueError, ex:
+                print "Can't be processed. ", ex
 
-                if filter != None:
-                    self.clear_filter()
+            if filter != None:
+                self.clear_filter()
 
-                sys.stdout = out
+            sys.stdout = out
 
-                boscliutils.Log.debug("CLI Cmd end: '%s'" % line.strip())    
+            boscliutils.Log.debug("CLI Cmd end: '%s'" % line.strip())    
         except IndexError,e:
             boscliutils.Log.error("Error executing CLI Cmd: '%s'" % line.strip())
             boscliutils.Log.error("Exception: %s" % e)
@@ -775,27 +740,16 @@ mandatory for the correspondient sort option)
       show this help
   -n, nopasswd
       don't ask for the password when change to a "mode" if we are root.
-  -t, test
-      show the commands that will be executed, but don`t execute anything.
-      This parameter is for testing or sintax checking.
   -f, --file = path 
       read and execute the commands in this file before enter 
       in interactive mode.
-  -i, --init 
-      this cli is the initial cli (login) so it must display 
-      copyright, message of day, etc.
-  -r, --reference 
-      generate the user manual as a html file
   -v, --verbose 
       log more info to system log
   -d, --debug 
       log debug messages to system log
 
-
-
-More info at: 
- * Bifer Operating System CLI developer Manual
- * Bifer Operating System CLI user Manual 
+More info at Boscli hompage
+http://oss.alea-soluciones.com/trac/wiki/BoscliOss 
 """ 
     print usage_msg
 
@@ -836,27 +790,21 @@ def main():
      
     try:
         opts, args = getopt.getopt(sys.argv[1:], \
-                                   "vdtnhf:ir", \
-                                   ["vervose","debug","test", "nopasswd", "help", "file=", \
-                                    "init", "reference"])
+                                   "vdnhf:", \
+                                   ["vervose","debug", "nopasswd", "help", "file="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     command_file = None
-    initial_cli =  False
-    generate_manual = False
     nopasswd_superuser = False
-    test = False
     verbose = False
     debug = False
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        elif opt in ("-t", "--test"):
-            test = True
         elif opt in ("-v", "--verbose"):
             verbose = True
         elif opt in ("-d", "--debug-level"):
@@ -865,10 +813,6 @@ def main():
             nopasswd_superuser = True
         elif opt in ("-f", "--file"):
             command_file = os.path.normpath(arg)
-        elif opt in ("-i", "--init"):
-            initial_cli = True
-        elif opt in ("-r", "--reference"):
-            generate_manual = True
         else:
             initial_error ("%s, unhandled option" % opt)
 
@@ -879,16 +823,9 @@ def main():
  
 
     # Open new CLI in normal mode
-    cli = BiferShell(initial_cli, \
-                     nopasswd_superuser, test, args)
+    cli = BiferShell(nopasswd_superuser, args)
     if command_file: cli.exec_cmds_file(command_file)    
     
-    if generate_manual:
-        import manual
-        manual.generate_html_user_doc()
-        print "Manual generated"
-    else:
-        boscliutils.Log.info("Entering in interactive mode")
-        cli.run()
-    
+    boscliutils.Log.info("Entering in interactive mode")
+    cli.run()
     boscliutils.Log.info("End boscli")
