@@ -34,7 +34,8 @@ class Privileges:
         self.__mode = mode
 
 class CliFunctionsManager:
-    def __init__(self):
+    def __init__(self, name):
+        self.__name = name
         self.__prompts = {
             0: '>',
             1: '#',
@@ -45,8 +46,8 @@ class CliFunctionsManager:
             1: 'enable',
             2: 'manuf'
             }
-        self.__pass_file = "~/.boscli_passwd"    
-        self.__privileges_file = "~/.boscli_privileges"
+        self.__pass_file = "~/.%s_passwd" %  self.__name
+        self.__privileges_file = "~/.%s_privileges"  %  self.__name
         self.__priv = 0
         self.__mode = 'normal'
         self.__valid_modes = ['normal', 'configure']

@@ -46,6 +46,7 @@ class BiferShell:
     get_instance = Callable(get_instance)
     
     def __init__(self,             
+                 name,
                  nopasswd_superuser,
                  extensions):         
 
@@ -54,12 +55,14 @@ class BiferShell:
         # register singleton instance
         BiferShell.instance = self
 
+        self.__name = name
+
         if not sys.stdin.isatty(): # redirected from file or pipe
             self.__interactive = False
         else:
             self.__interactive = True        
 
-        self.__cliFunctionsManager = privileges.CliFunctionsManager()
+        self.__cliFunctionsManager = privileges.CliFunctionsManager(self.__name)
         self.__cliFunctionsManager.init_privileges()
 
         self.nopasswd_superuser = nopasswd_superuser
@@ -167,7 +170,7 @@ class BiferShell:
 
 
     def init_readline(self):
-        init_file = os.path.expanduser("~/.cli-init")
+        init_file = os.path.expanduser("~/.%s-init" % self.__name)
         readline.parse_and_bind("set bell-style visible")        
         try:
             readline.read_init_file(init_file)
@@ -175,7 +178,7 @@ class BiferShell:
             pass        
         
     def init_history(self):
-        histfile=os.path.expanduser("~/.cli-history")
+        histfile=os.path.expanduser("~/.%s-history" % self.__name)
         try:
             readline.read_history_file(histfile)
         except IOError:
@@ -234,7 +237,7 @@ class BiferShell:
             
     def prompt_str(self):
         context_info = self.__cliFunctionsManager.context_info()
-        return '(%s) bcli %s ' % (self.host, context_info)
+        return '(%s) %s %s ' % (self.host, self.__name, context_info)
         
     def set_prompt(self):
         """Change the prompt using the host and the mode"""
@@ -750,6 +753,9 @@ mandatory for the correspondient sort option)
       
   -h, --help 
       show this help
+  -a, name
+      boscli instance name. Used for separate conf/history files,
+      and to identify log messages.
   -n, nopasswd
       don't ask for the password when change to a "mode" if we are root.
   -f, --file = path 
@@ -802,8 +808,8 @@ def main():
      
     try:
         opts, args = getopt.getopt(sys.argv[1:], \
-                                   "vdnhf:", \
-                                   ["vervose","debug", "nopasswd", "help", "file="])
+                                   "vdnhf:a:", \
+                                   ["vervose","debug", "nopasswd", "help", "file=", "name"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -813,12 +819,15 @@ def main():
     nopasswd_superuser = False
     verbose = False
     debug = False
+    name = 'boscli-oss'
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
         elif opt in ("-v", "--verbose"):
             verbose = True
+        elif opt in ("-a", "--name"):
+            name = arg
         elif opt in ("-d", "--debug-level"):
             debug = True
         elif opt in ("-n", "--nopasswd"):
@@ -830,14 +839,14 @@ def main():
 
             
 
-    boscliutils.Log.init('boscli-oss', verbose, debug)
-    boscliutils.Log.log("Starting boscli")
+    boscliutils.Log.init(name, verbose, debug)
+    boscliutils.Log.log("Starting %s" % name)
  
 
     # Open new CLI in normal mode
-    cli = BiferShell(nopasswd_superuser, args)
+    cli = BiferShell(name,nopasswd_superuser, args)
     if command_file: cli.exec_cmds_file(command_file)    
     
     boscliutils.Log.info("Entering in interactive mode")
     cli.run()
-    boscliutils.Log.info("End boscli")
+    boscliutils.Log.info("End %s" % name)
