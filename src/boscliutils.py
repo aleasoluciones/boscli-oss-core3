@@ -12,8 +12,7 @@
 '''
 
 import os, signal, sys
-import logging
-import logging.handlers
+import syslog
 import subprocess
 import boscli
 import tempfile
@@ -29,33 +28,41 @@ class Callable:
 
 
 class Log:
-    log_file = 'boscli.log'
-    
-    def init():
-        logging.basicConfig(level=logging.DEBUG,
-                            format='%(asctime)-15s boscli %(levelname)s %(message)s',
-                            filename= Log.log_file,
-                            filemode='a')
+    Name = ''
+    Verbose = False
+    Debug = False
+
+    def init(name, verbose, debug):
+        Log.Name = name
+        Log.Verbose = verbose
+        Log.Debug = debug
+        syslog.openlog(name)
         
     def debug(msg):
-        logging.debug(msg)
+        if Log.Debug:
+            syslog.syslog(syslog.LOG_DEBUG, msg)
+
+    def log(msg):
+        syslog.syslog(syslog.LOG_INFO, msg)
 
     def info(msg):
-        logging.info(msg)
+        if Log.Verbose or Log.Debug:
+            syslog.syslog(syslog.LOG_INFO, msg)
         
     def warning(msg):
-        logging.warning(msg)
+        syslog.syslog(syslog.LOG_WARNING, msg)
 
     def error(msg, exception):
         import traceback
-        logging.error(msg)
-        logging.error(''.join(traceback.format_list(traceback.extract_stack())))
+        syslog.syslog(syslog.LOG_ERROR, msg)
+        syslog.syslog(syslog.LOG_ERROR, ''.join(traceback.format_list(traceback.extract_stack())))
         traceback.print_exc()
 
 
     init = Callable(init)
     debug = Callable(debug)
     info = Callable(info)
+    log = Callable(log)
     warning = Callable(warning)
     error = Callable(error)
 

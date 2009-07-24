@@ -383,7 +383,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             if self.test:
                 print "(test) Cmd: '%s'" % (line)
             else:
-                boscliutils.Log.info("CLI Cmd: '%s'" % line.strip())
+                boscliutils.Log.debug("CLI Cmd: '%s'" % line.strip())
                 # FIXME: Change implementation for not use global info for filters
 
                 out = sys.stdout
@@ -413,10 +413,10 @@ Type ?<tab> at the end of a line to see the contextual help for this line
 
                 sys.stdout = out
 
-                boscliutils.Log.info("CLI Cmd end: '%s'" % line.strip())    
+                boscliutils.Log.debug("CLI Cmd end: '%s'" % line.strip())    
         except IndexError,e:
-            boscliutils.Log.warning("Error executing CLI Cmd: '%s'" % line.strip())
-            boscliutils.Log.debug("Exception: %s" % e)
+            boscliutils.Log.error("Error executing CLI Cmd: '%s'" % line.strip())
+            boscliutils.Log.error("Exception: %s" % e)
             print e
         finally:
             self.in_command_execution = False
@@ -444,9 +444,6 @@ Type ?<tab> at the end of a line to see the contextual help for this line
                         print "May be you are looking for: "
                         self.interactive_help(line.split(), '')
                         return None
-                    else:
-                        print ret
-                        print "---"
                 # Si no la hemos podido ejecutar decimos que sintaxis desconocida
             except KeyError, ex:
                 print line
@@ -463,6 +460,8 @@ Type ?<tab> at the end of a line to see the contextual help for this line
     def default(self, line):
         if line != None:
             print "Sintax Error. Unknow command '%s'" % (line)
+            boscliutils.Log.debug( "Sintax Error. Unknow command '%s'" % (line))
+
         return False       
         
     ## Some helper functions
@@ -530,7 +529,7 @@ Type ?<tab> at the end of a line to see the contextual help for this line
             self.quit()
             
     def quit(self):
-        boscliutils.Log.info("Exit boscli")
+        boscliutils.Log.log("Exit boscli")
         if self.__interactive:
             print
             print "bye"
@@ -787,6 +786,11 @@ mandatory for the correspondient sort option)
       copyright, message of day, etc.
   -r, --reference 
       generate the user manual as a html file
+  -v, --verbose 
+      log more info to system log
+  -d, --debug 
+      log debug messages to system log
+
 
 
 More info at: 
@@ -832,8 +836,8 @@ def main():
      
     try:
         opts, args = getopt.getopt(sys.argv[1:], \
-                                   "tnhf:ir", \
-                                   ["test", "nopasswd", "help", "file=", \
+                                   "vdtnhf:ir", \
+                                   ["vervose","debug","test", "nopasswd", "help", "file=", \
                                     "init", "reference"])
     except getopt.GetoptError, err:
         # print help information and exit:
@@ -845,12 +849,18 @@ def main():
     generate_manual = False
     nopasswd_superuser = False
     test = False
+    verbose = False
+    debug = False
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
         elif opt in ("-t", "--test"):
             test = True
+        elif opt in ("-v", "--verbose"):
+            verbose = True
+        elif opt in ("-d", "--debug-level"):
+            debug = True
         elif opt in ("-n", "--nopasswd"):
             nopasswd_superuser = True
         elif opt in ("-f", "--file"):
@@ -862,8 +872,11 @@ def main():
         else:
             initial_error ("%s, unhandled option" % opt)
 
-    boscliutils.Log.init()
-    boscliutils.Log.info("Starting boscli")
+            
+
+    boscliutils.Log.init('boscli-oss', verbose, debug)
+    boscliutils.Log.log("Starting boscli")
+ 
 
     # Open new CLI in normal mode
     cli = BiferShell(initial_cli, \
