@@ -54,8 +54,8 @@ class Log:
 
     def error(msg, exception):
         import traceback
-        syslog.syslog(syslog.LOG_ERROR, msg)
-        syslog.syslog(syslog.LOG_ERROR, ''.join(traceback.format_list(traceback.extract_stack())))
+        syslog.syslog(syslog.LOG_ERR, msg)
+        syslog.syslog(syslog.LOG_ERR, ''.join(traceback.format_list(traceback.extract_stack())))
         traceback.print_exc()
 
 
