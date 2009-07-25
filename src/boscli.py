@@ -59,14 +59,18 @@ class BiferShell:
 
         self.__name = name
         self.__confpath = confpath
+        refusedfunctions = []
         if self.__confpath != None:
+            boscliutils.Log.info("Parsing '%s' conf file" % self.__confpath)
             config = ConfigParser.ConfigParser()
-            config.read(os.path.expanduser(self.__confpath))
-            print "CONF"
-            print config
-            print "--------"
+            res = config.read(os.path.expanduser(self.__confpath))
+            if len(res) == 0:
+                boscliutils.Log.warning("Error parsing '%s' conf file" % self.__confpath)
+                raise ValueError("Error parsing '%s' conf file" % self.__confpath)
 
-
+            boscliutils.Log.info("'%s' conf file parsed" % self.__confpath)
+            if config.has_section('refusedfunctions'):
+                refusedfunctions = [kv[1] for kv in config.items('refusedfunctions')]
 
 
         if not sys.stdin.isatty(): # redirected from file or pipe
@@ -74,7 +78,7 @@ class BiferShell:
         else:
             self.__interactive = True        
 
-        self.__cliFunctionsManager = privileges.CliFunctionsManager(self.__name)
+        self.__cliFunctionsManager = privileges.CliFunctionsManager(self.__name, refusedfunctions)
         self.__cliFunctionsManager.init_privileges()
 
         self.nopasswd_superuser = nopasswd_superuser

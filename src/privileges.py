@@ -17,7 +17,7 @@ import os.path
 import os
 import time
 import socket
-
+import re
 
 NONE, ENABLE, MANUF = 0,1,2
 NORMAL, CONFIGURE = 'normal', 'configure'
@@ -34,8 +34,9 @@ class Privileges:
         self.__mode = mode
 
 class CliFunctionsManager:
-    def __init__(self, name):
+    def __init__(self, name, refusedfunctions):
         self.__name = name
+        self.__refusedfunctions = refusedfunctions
         self.__prompts = {
             0: '>',
             1: '#',
@@ -62,6 +63,7 @@ class CliFunctionsManager:
             pass
         self.__functions_access = {}
         self.__functions = {}
+        
 
     def init_privileges(self):
         # try to read password file (if exists)
@@ -75,7 +77,8 @@ class CliFunctionsManager:
     def validate_conf(self):
         errors = [f for f in self.__functions_access.keys() if f not in self.__functions.keys()]
         for e in errors:
-            print "Access defined for an inexistent symbol: %s" % e
+            boscliutils.Log.info("Access defined for an inexistent symbol: %s" % e)
+            del self.__functions_access[e]
 
 
     def execute(self, function, args):
@@ -104,12 +107,26 @@ class CliFunctionsManager:
             return False
         return False
 
-    
-
-    def append(self, function_name, func):
+    def valid_function(self, function_name):
         
+        # At this moment, we only validate if the function
+        # is configured to be refused ([refusedfunctions] section
+        # at conf file
+        for expr in self.__refusedfunctions:
+            expr = expr.strip()
+            if expr != '' and re.match(expr, function_name):
+                boscliutils.Log.debug("'%s' refused function (conf '%s')" % (function_name, expr))
+                return False
+        return True
+
+
+    def append(self, function_name, func):        
         # Remove initial word, from functionname (bcli, dynbcli, etc)
         function_name = '_'.join(function_name.split('_')[1:])
+
+        if not self.valid_function(function_name):
+            boscliutils.Log.debug("'%s' refused function" % (function_name))
+            return
 
         self.__functions[function_name] = func
         if not self.__functions_access.has_key(function_name):
