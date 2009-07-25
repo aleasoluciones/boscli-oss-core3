@@ -113,7 +113,13 @@ class CliFunctionsManager:
         # is configured to be refused ([refusedfunctions] section
         # at conf file
         for expr in self.__refusedfunctions:
+            # The reg expr, can have spaces as word separator, so
+            # we remove spaces at the begining and at the end, and
+            # replace the internal separators with '_' that is the
+            # real separator for functs names
             expr = expr.strip()
+            expr = "_".join(expr.split())
+
             if expr != '' and re.match(expr, function_name):
                 boscliutils.Log.debug("'%s' refused function (conf '%s')" % (function_name, expr))
                 return False
