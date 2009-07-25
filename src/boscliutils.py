@@ -50,6 +50,7 @@ class Log:
             syslog.syslog(syslog.LOG_INFO, msg)
         
     def warning(msg):
+        print msg
         syslog.syslog(syslog.LOG_WARNING, msg)
 
     def error(msg, exception):
