@@ -95,6 +95,56 @@ The types allready defined are:
  * WEBURL => Web URL, Ex: http://www.debian.org or https://www-nasa.gov
 
 
+=== Already defined cli functs ===
+
+ * Commands for define alias.
+  * '''alias define <STRING> <STRING>''' Define/Overwrite an alias.
+  * '''alias list''' Show defined aliases and the corresponding values.
+  * '''alias remove <ALIAS>''' Remove the asigned value for an alias.
+ * Commands for interact with the BosCli itself.
+  * '''cli exec <FILE>''' Execute a BosCli file.
+  * '''cli history''' Show comand history.
+  * '''cli history clear''' Clear/Reset command history.
+  * '''cli pager <STATE>''' Activate or Deactivate the command output pager.
+  * '''cli pager''' Show if the pager is active or not.
+  * '''cli quit''' Exit from BosCli.
+  * '''cli reload''' Reload all the functions registered at CLI.
+ * Commands related to privilege level or boscli mode (normal/configure)
+  * '''configure''' Change mode to configuremode
+  * '''configure terminal''' Change mode to configuremode
+  * '''disable''' Change privileges to 0 (initial level)
+  * '''enable''' Change privileges to enable level (level 1)
+  * '''manufacturer''' Change privileges to manufacturer level (level 2)
+  * '''passwd''' Change login password.
+  * '''passwd priv enable''' Change configure enable privilege level password.
+  * '''passwd priv manufacturer''' Change configure manufacturer privilege level password.
+  * '''privilege initial enable''' Set enable level as initial privilege level for actual user
+  * '''privilege initial manufacturer''' Set manufacturer level as initial privilege level for actual user
+  * '''privilege initial normal''' Set normal level as initial privilege level for actual user
+ * Commands for interactive help.
+  * '''help basic''' Show basic help. Same as '?<tab>' at command lines
+  * '''help command <CMD>''' Show short help of the (active) functions corresponding to the command expecified.
+  * '''help extended command <CMD>''' Show extendeed help of the (active) functions corresponding to the command expecified.
+  * '''help show allcommands''' Show a list of all available commands (only for active mode).
+  * '''help show allcommands full''' Show basic help for all availables commands (only for active mode).
+  * '''help types''' Show help for type/vars used in CLI commands.
+  * '''remotehelp act''' Activate remote help mode. 
+  * '''remotehelp connect''' Connect to an active remote help session.
+ * '''exit''' Exit from configure mode or from CLI (if we are at NORMAL mode).
+
+==== Deactivate already defined cli functs ====
+When we develop a new cli, usaly we want a lot of the predefined boscli-oss functions, but not all. For deactivating some predefined  boscli-oss functions, we should use the section '''refusedfunctions''' configuration file. At this section we can define a regular expresion that match the functions we want to deactivate.
+For example, if we define a cli and we don't want the alias functions, the remote help functions and the function ''help show allcommands full'', the conf file would be like this:
+{{{
+
+[refusedfunctions]
+noalias = alias*
+noremotehelp = remotehelp*
+nofullhelp = help show allcommands full
+}}}
+
+In the '''refusedfunctions''' section, the keys (in this case noalias, noremotehelp and nofullhelp) have no meaning and are not used by the boscli, but '''they must be uniques''' (you can use the same key in two differents lines).
+Another important point, is that the value can me a regular expresion (like remotehelp*) or can be a complete funct name.
 
 
 === Boscli Extension Files ===
