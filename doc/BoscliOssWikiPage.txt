@@ -1,0 +1,190 @@
+[[PageOutline()]]
+
+= Boscli Oss =
+
+== Main Boscli Features ==
+
+=== Features for final users ===
+ * Command Autocompletion
+ * Interactive line edition
+ * Contextual Help
+ * Pagination
+ * Filters
+ * Command history
+
+=== Features for developers ===
+ * Integrated plugin system
+ * Easy new plugin creation
+   * Easy new command definition
+   * Easy new types definition
+ * Auto generated help
+ * Basic types support
+ * Function access control support
+ * Function mode support
+ * Command execution Log
+
+
+=== Integrated plugin system ===
+
+==== Easy new plugin creation ====
+
+==== Easy new command definition ====
+
+==== Easy new types definition ====
+
+To create a new type definition in our extension, we need to define a new class derivated from bostypes.!BiferShellType, and implement a values method.
+
+The following example define a type that return the names of the sites defined at apache2 configuration (each site definition is a file at '/etc/apache2/sites-enabled/' dir.
+
+The contructor ''!__init!__'' must define the type help string, and pass it to the ''bostypes.!BiferShellType'' constructor.
+The ''values'' method must return a string list with all the correct values that can be used for a parameter of this type. The ''values'' method can use the ''imcomplete_word'' parameter to decide wich values should return. When the boscli engine must complete a value for this type, it call the method ''values'' passing the actual word text as ''incomplete_word''. Even if the method don't check ''incomplete_word'' parameter, the boscli engine will filter the list returned, and it will only use the values returnd that start with the ''incomplete_word''.
+
+In this case, the ''values'' method return all the file names (without the base path) found at '/etc/apache2/sites-enabled/' dir.
+
+{{{
+class BiferShellSiteEnabled(bostypes.BiferShellType):
+    def __init__(self): 
+        bostypes.BiferShellType.__init__(self, "Enabled sites name")
+    def values(self, incomplete_word):
+        sites = [os.path.basename(d) for d in glob.glob('/etc/apache2/sites-enabled/*')]
+        return sites
+}}}
+
+The new type must be registered at the boscli engine, so we call add_type, with the name type for use at command definitions, and an object of the new type.
+
+{{{
+get_cli().add_type('SITEENABLED', BiferShellSiteEnabled())
+}}}
+
+
+Now, we can use this new type for new command definition. For example:
+
+
+{{{
+def bcli_apache_disable_SITEENABLED(line_words):
+    """Disable apache2 site (and reload conf)
+    """
+    site = line_words[2]
+    print "Disabling apache2 site %s" % site
+    boscliutils.apache_disable_site(site)
+}}}
+
+
+
+=== Basic types support ===
+As we see in the previous section, the creation of new types is very easy. Anyway, we have a few basic type already defined at boscli-oss-core that we can use for our commands.
+
+The types allready defined are:
+ * ALIAS => Doc to be defined
+ * BOOL => Coditional value. Accepted values 'true', 'false', '1', '0'
+ * CIDR => Address in Classless Inter-Domain Routing  notation: Ex: 192.168.1.100/24
+ * CMD => Cli available functions
+ * FILE => Filename with absolute path
+ * FLOAT => Decimal number
+ * HOST => Hostname. Ex: www.google.com, bif-shp1
+ * INT => Integer value. Ex: 42
+ * IP => IP Address in dot-decimal notation: Ex: 192.168.1.100
+ * IPHOST => Hostname or IP Address. Ex: 192.168.10.200, www.google.com
+ * KERNELVAR => Kernel variable. Ex: net.unix.max_dgram_qlen or fs.mqueue.msgsize_max
+ * MAC => MAC or Ethernet Address in hex notation. Ex: 00:01:02:03:04:08
+ * NET => Doc to be defined
+ * NETIF => Ethernet interface. Ex: eth0, eth1, eth0:0
+ * NETMASK => Netmask in Dot-decimal Address. Ex: 255.255.255.0
+ * STATE => State value. Accepted values 'on', 'off', 'up', 'down'
+ * STRING => Sequence of letters, digits or '_'. Ex: Xema
+ * WEBURL => Web URL, Ex: http://www.debian.org or https://www-nasa.gov
+
+
+
+
+=== Boscli Extension Files ===
+In order to define boscli commands that only use normal shell commands but with concrete parameter or using boscli defined types, we can use boscli files instead of define a boscli python extensions.
+
+This files names must end with the boscli extension, for example cmdsystem.boscli. It contains one or more command definitios in a .ini format
+
+Example:
+{{{
+[cmd]
+cmd=sys show so version
+shell=cat /etc/lsb_release
+doc=Show SO release 
+
+[cmd]
+cmd=sys show kernel version
+shell=uname -r
+doc=Show kernel version
+
+[cmd]
+cmd=sys htop
+shell=htop
+doc=Interactive process viewer
+interactive=yes
+priv=ENABLE
+}}}
+
+Each comamnd is defined in its own command section ([cmd]). In the command secion allways must define the following keywords:
+ * '''cmd''' The comand name used at the boscli
+ * '''shell''' The line to execute at shell prompt (it can use pipes and redirections)
+ * '''doc''' The short doc showed when help is requested for this command at boscli
+
+
+There are optional keywords like:
+ * '''priv'''
+ * '''interactive'''
+
+'''priv''' define the minimal privileges level required for use the comand. The accepted values are NONE, ENABLE, MANUF. The default value is NONE.
+
+'''interactive''' is a boolean var that define how the shell command should be executed. The values are:
+ * 'iteractive = yes' The shell command is executed using boscliutils.!InteractiveCommand, so the boscli execute the command without interfering in the standard input/ouput of the subprocess. This mode is interesting for interactive commands as top, or full term editors, and so on
+ * 'iteractive = no' The shell command is executed using boscliutils.!BatchCommand. In this case the subprocess is supposed to work by line so the boscli will interfer on the output, for example for filter (using begin, include, exclude boscli filters). This is the '''default'''
+
+
+==== Commands with parameters ====
+The commands defined at boscli files can use parameters using the boscli defined types.
+For example if we have defined a IPSHAPER type for the boscli (using a python boscli extension) we can use this type in our commands definition:
+
+{{{
+[cmd]
+cmd=shaper dumptraff host:IPSHAPER
+doc=Show host traffic real time
+shell=tshark -i any -f \"host ${host}\"
+}}}
+
+The parameter is defined using a lowercase parameter name and the uppercase type name separated by ':'.
+In the example we define a parameter 'host' using the type 'IPSHAPER' that is defined in a extension. We can use the parameter value, using ${<paramname>} at the shell line.
+So in the above example the ${host} will be substituted by the host value introduced by the user.
+
+
+User input: 
+{{{
+shaper dumptraff laptop
+}}}
+Shell command executed: 
+{{{
+tshark -i any -f "host laptop"
+}}}
+
+
+Of course, we can use all the parameters we need, using our type definitions, or the boscli included type definitions (as INT, IP, HOST, etc)
+
+{{{
+[cmd]
+cmd=shaper dumptraff host:IPSHAPER port:INT
+doc=Show host/port traffic real time
+shell=tshark -i any -f \"host ${host} and port ${port}\"
+priv = MANUF
+
+[cmd]
+cmd=shaper tcview iface:NETIF
+doc=Show tc simple tc throughtput
+shell=/opt/bos/bin/tc-viewer --zero --iface ${iface} --unit=kbit
+priv = MANUF
+}}}
+
+
+=== download ===
+To download the svn development version from Alea Soluciones anonymous SVN execute the following command:
+{{{
+svn co http://oss.alea-soluciones.com/svn/boscli-oss
+}}}
+
