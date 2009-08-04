@@ -1,5 +1,6 @@
 BOS_BIN_DIR=${DESTDIR}/usr/bin/
 BCLI_DIR=${DESTDIR}/usr/lib/boscli/
+BCLI_PLUGINS_DIR=${BCLI_DIR}/plugins
 
 build:
 	echo "build: Nothing to do"
@@ -8,6 +9,8 @@ install:
 	echo "install: ${dir}"
 
 	mkdir -p ${BOS_BIN_DIR} 
+	mkdir -p ${BCLI_PLUGINS_DIR}
+
 
 	install -m 775 -o root -g root -d ${BOS_BIN_DIR}/
 	install -m 775 -o root -g root bin/* ${BOS_BIN_DIR}/
