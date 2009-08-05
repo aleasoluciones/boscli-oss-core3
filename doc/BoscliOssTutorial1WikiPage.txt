@@ -1,0 +1,51 @@
+[[PageOutline()]]
+
+
+= Basic Boscli-oss Tutorial =
+How to create our own interactive Shell using Boscli-oss
+
+
+== Tutorial Boscli shell/ Capscli ==
+Only as a dummy example, in this document I will describe how to develop a tiny interactive CLI to capture network traffic and to send the reports to a central group of servers.
+The name of this cli will be capscli (from capture and cli (command line interface))
+
+=== Prerequisites ===
+Of course we need the boscli-oss installed (see Installation)
+
+=== Let's go ===
+
+All good software have a config files at /etc dir, so I will create the following files:
+ * A empty configuration file '''/etc/capscli/capscli.conf''' 
+ * A servers file '''/etc/capscli/servers'''
+
+{{{
+captserver1.alea-soluciones.com
+captserver2.alea-soluciones.com
+captserver3.alea-soluciones.com
+captserver4.alea-soluciones.com
+}}}
+
+=== Define boscli python commands ===
+capscli main python file
+/usr/lib/boscli/plugins/capscli/capscli.py
+
+
+    * Inicialization
+          o Parse configuration
+          o Other initialization
+    * New Types
+    * Commands access control
+    * Commands
+
+=== Define of new boscli types ===
+
+
+
+=== Define boscli python commands ===
+=== Define boscli commands using boscli file ===
+=== Create a script to start the shell ===
+=== Configure boscli to hide some default commands/features ===
+=== Test it! ===
+
+
+
