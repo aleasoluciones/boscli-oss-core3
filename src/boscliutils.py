@@ -16,7 +16,6 @@ import syslog
 import subprocess
 import boscli
 import tempfile
-import tailer
 import threading,time
 
 
@@ -299,34 +298,6 @@ class FilterOut:
             if self.validate_line(l):
                 self.output_line(l + '\n')
         self.__text = ''
-
-
-
-def follow_file(file_name, num_lines = 20):
-    handler_sigterm = signal.getsignal(signal.SIGTERM)
-    handler_sigint = signal.getsignal(signal.SIGINT)
-    handler_sigtstp = signal.getsignal(signal.SIGTSTP)
-    try:
-        signal.signal(signal.SIGTERM, cmd_signalhandler)
-        signal.signal(signal.SIGINT, cmd_signalhandler)
-        signal.signal(signal.SIGTSTP, cmd_signalhandler)
-
-        for line in tailer.tail(open(file_name), num_lines):
-            print line
-        for line in tailer.follow(open(file_name), delay=0.01):
-            print line
-
-    except IOError, (errno, strerror):
-        pass
-    except CmdInterrupted:
-        pass
-    finally:
-        signal.signal(signal.SIGTERM, handler_sigterm)
-        signal.signal(signal.SIGINT, handler_sigint)
-        signal.signal(signal.SIGTSTP, handler_sigtstp)
-
-
-
 
     
 def main():
