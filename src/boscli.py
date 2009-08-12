@@ -756,20 +756,23 @@ class BiferShell:
     
 def usage():
     usage_msg = """
-Use mode: cli [OPTIONS] [extdir1 extdir2 ...]
-Open a interfactive Command Line Interface/Interpreter for 
-BiferOperatimSystem. 
+Use mode: boscli [OPTIONS] [extdir1 extdir2 ...]
+Open a interactive Command Line Interface/Interpreter 
 
 The valid options are:
 (The mandatory argument for "long format" options are also 
-mandatory for the correspondient sort option)
+mandatory for the correspondent sort option)
       
   -h, --help 
       show this help
-  -a, name
+  -a, --name
       boscli instance name. Used for separate conf/history files,
       and to identify log messages.
-  -n, nopasswd
+  -c, --conf = path
+      load the specified file as configuration. The configuration
+      file is used basically to deactivate already defined boscli
+      functions
+  -n, --nopasswd
       don't ask for the password when change to a "mode" if we are root.
   -f, --file = path 
       read and execute the commands in this file before enter 
@@ -788,7 +791,7 @@ http://oss.alea-soluciones.com/trac/wiki/BoscliOss
 def initial_error(err_msg):
     print "Error."
     print err_msg
-    print "Use: cli -h to see the how to use the command"
+    print "Use: boscli -h to see the how to use the command"
     sys.exit()
 
 
