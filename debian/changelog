@@ -2,7 +2,7 @@ boscli-oss-core (0.2.0-1) unstable; urgency=low
 
   * Cleanups and code reestucture
 
- -- Eduardo Ferro <eferro@alea-soluciones.com>   Wed, 12 Aug 2009 03:49:28 +0200
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Wed, 12 Aug 2009 03:49:28 +0200
 
 boscli-oss-core (0.1.9-5) unstable; urgency=low
 
