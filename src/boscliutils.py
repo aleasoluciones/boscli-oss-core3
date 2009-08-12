@@ -325,47 +325,8 @@ def follow_file(file_name, num_lines = 20):
         signal.signal(signal.SIGINT, handler_sigint)
         signal.signal(signal.SIGTSTP, handler_sigtstp)
 
-# FIXME bifer system dep
-def distrib_version():
-    # Example:
-    # /etc/lsb-release (content)
-    # DISTRIB_ID=UbuntuBos
-    # DISTRIB_RELEASE=7.04-0.2
-    # DISTRIB_CODENAME=loe (living on the edge)
-    # DISTRIB_DESCRIPTION="UbuntuBos 7.04-0.2"
-    
-    version = None
-    for l in open('/etc/lsb-release', 'r'):
-        if l.startswith('DISTRIB_RELEASE'):
-            version = l.split('=')[1][:-1]
-    return version
-
-def distrib_majorversion():
-    return distrib_version().split('-')[0]
-
-def distrib_minorversion():
-    try:
-        minorversion = distrib_version().split('-')[1]
-        return minorversion        
-    except IndexError:
-        return ''
 
 
-def apache_enable_site(site):
-    os.popen("ln -s /etc/apache2/sites-available/%s /etc/apache2/sites-enabled/%s" % (site, site)).readlines()
-    os.popen("/etc/init.d/apache2 reload").readlines()
-
-def apache_disable_site(site):
-    os.popen("rm /etc/apache2/sites-enabled/%s" % site).readlines()    
-    os.popen("/etc/init.d/apache2 reload").readlines()
-
-
-
-
-def ngrep(eth, port, mta):
-    BatchCommand("ngrep -d %s  -l port %d and host %s" % (eth, port, mta))
-def ngrep_byline(eth, port, mta):
-    BatchCommand("ngrep -d %s  -W byline -l port %d and host %s" % (eth, port, mta))
 
     
 def main():
