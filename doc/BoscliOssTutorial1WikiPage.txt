@@ -1,51 +1,320 @@
-[[PageOutline()]]
 
+[[PageOutline()]]
 
 = Basic Boscli-oss Tutorial =
 How to create our own interactive Shell using Boscli-oss
 
 
 == Tutorial Boscli shell/ Capscli ==
-Only as a dummy example, in this document I will describe how to develop a tiny interactive CLI to capture network traffic and to send the reports to a central group of servers.
-The name of this cli will be capscli (from capture and cli (command line interface))
+Only as a dummy example, in this document I will describe how to develop a tiny interactive CLI to capture network traffic and to send the reports to a central group of servers. The name of this cli will be capscli (from capture and cli (command line interface))
 
-=== Prerequisites ===
-Of course we need the boscli-oss installed (see Installation)
-
-=== Let's go ===
+Of course we need the boscli-oss installed (see [wiki:BoscliOss#Installation])
+We will use tcpdump for the real network traffic capture, so we need to have this great tool installed.
 
 All good software have a config files at /etc dir, so I will create the following files:
- * A empty configuration file '''/etc/capscli/capscli.conf''' 
- * A servers file '''/etc/capscli/servers'''
+ * A empty configuration file '''/etc/capscli/capscli.conf'''
+ * A servers file '''/etc/capscli/servers''' with hostnames or ip addresses of the servers (one per line)
 
+=== Capscli Plugin files and structure ===
+
+The boscli capscli plugin contains the following files:
+ * '''/usr/lib/boscli/plugins/capscli/capscli.py''' with the main plugin code, including the new types definition.
+ * '''/usr/lib/boscli/plugins/capscli/cmdcapscli.boscli''' with more commands.
+
+The '''capscli.py''' file have the following structure:
+ * Imports
+ * Plugin internal initialization
+ * Capscli types definition
+ * Commands definitions 
+
+The internal initialization include the needed code to create a class with the capscli server list and the capscli data path.
 {{{
-captserver1.alea-soluciones.com
-captserver2.alea-soluciones.com
-captserver3.alea-soluciones.com
-captserver4.alea-soluciones.com
+#!python
+class CapscliPlugin():
+    Servers = None
+    DataDir = '/var/lib/capscli/'
+    
+    def __init__(self):
+        self.loadconf()
+
+    def loadconf(self):
+        boscliutils.Log.info("Loading configuration")        
+        CapscliPlugin.Servers = open("/etc/capscli/servers", "r").read().splitlines()    
+        try:
+            # create capsdir if not exists            
+            os.makedirs(CapscliPlugin.DataDir)
+        except OSError:
+            # already exists... 
+            pass
+
+boscliutils.Log.info("Initialization")        
+CapscliPlugin()
 }}}
 
-=== Define boscli python commands ===
-capscli main python file
-/usr/lib/boscli/plugins/capscli/capscli.py
-
-
-    * Inicialization
-          o Parse configuration
-          o Other initialization
-    * New Types
-    * Commands access control
-    * Commands
-
 === Define of new boscli types ===
+At this point we have the list of valid servers in '''!CapscliPlugin.Servers''' (defined at the previous section) so we can define a boscli type to represent this servers.
+The type code is:
 
+{{{
+#!python
+class CapscliServer(bostypes.BiferShellType):
+    def __init__(self):
+        bostypes.BiferShellType.__init__(self,
+                                         "Capscli server hostname / ip")
+    def validate_value(self, value):
+	# Only accept servers configurated
+	return value in self.values('')
+
+    def values(self, incomplete_word):
+        return CapscliPlugin.Servers
+}}}
+
+
+As a boscli type, it should inherit from bostypes.!BiferShellType and implement the methods '''validate_value''' and '''values'''.
+At the constructor the object type must call the bostypes.!BiferShellType constructor with the type doc string, in this case "Capscli server hostname / ip".
+
+'''values''' method must return all the valid values for this types. Usualy we can use incomplete_word parameter to restrict the returned values. 
+
+'''validate_value''' method must return if a value es a valid. Usualy we accept a value if it is in the list of values returned by the '''values''' method.
+Some times, even if a value is not returned by '''values''' method, we can consider it valid. For example we can have a boscli type that return some IPs addresses, but we want to accept any IP.
+
+Now we define another boscli type for the capscli data files (in other words, for all the files woth ".pcap" extension at the capscli data directory).
+
+{{{
+#!python
+class CapscliDataFile(bostypes.BiferShellType):
+    def __init__(self):
+	bostypes.BiferShellType.__init__(self, "Capture data file name")
+
+    def validate_value(self, value):
+        return value in self.values('')
+
+    def values(self, incomplete_word):
+        data_dir = CapscliPlugin.DataDir
+        return [file.replace(data_dir, '') for file in glob.glob('%s/*.pcap' % data_dir)]
+}}}
+
+The last boscli type represent the diferent protocols supported for the network capture.
+
+{{{
+#!python
+class TransportProtocol(bostypes.BiferShellType):
+    def __init__(self):
+	bostypes.BiferShellType.__init__(self,
+                                         "Transport protocol supported for a capture (tcp, udp, ...)")
+
+    def validate_value(self, value):
+	return value in self.values('')
+
+    def values(self, incomplete_word):
+        return ['tcp', 'udp', 'icmp']
+}}}
+
+The boscli types defined must be registered at the boscli instance. So for each boscli type defined we register a instance of the type with the name/label we will use at the boscli commands.
+The name/label for a boscli type must be uppercase.
+
+{{{
+#!python
+boscli.get_cli().add_type('CAPSCLISERVER', CapscliServer())
+boscli.get_cli().add_type('CAPSCLIDATAFILE', CapscliDataFile())
+boscli.get_cli().add_type('TRANSPROTO', TransportProtocol())
+}}}
 
 
 === Define boscli python commands ===
+
+Continuing with the definition of '''capscli.py''' we define some very simple commands:
+
+{{{
+#!python
+def bcli_capscli(line_words):
+    """Capscli itself related commands"""
+    # this command only add doc for top level interactive help
+    pass
+
+def bcli_capture(line_words):
+    """Commands for traffic capture and capture files management"""
+    # this command only add doc for top level interactive help
+    pass
+
+def bcli_capscli_show_servers(line_words):
+    """Show/list configured servers for capscli"""
+    print "Configured capscli servers:"
+    for server in CapscliPlugin.Servers:
+        print server
+
+def bcli_capture_show(line_words):
+    """Show/list captures data files"""
+
+    print "Captures data files:"
+    data_dir = CapscliPlugin.DataDir
+    for dataFile in CapscliDataFile().values(''):
+        size = os.path.getsize(data_dir + os.path.sep + dataFile)
+	print "%-20s %20d" % (dataFile, size)
+}}}
+
+
+To implements the commands that capture traffic, we defined a dummy wrapper around the command line program tcpdump. 
+
+{{{
+#!python
+class Capturer():
+    """Helper class to perform simple network traffic captures"""
+
+    def __init__(self, net_address, port = None, transport = None):
+        self.net_address = net_address
+        self.port = port
+        self.transport = transport
+
+    def capture_file_name(self):
+        return "capt-%s.pcap" % datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    def capture_file_path(self):
+        data_dir = CapscliPlugin.DataDir
+	return os.path.abspath(data_dir + os.path.sep + self.capture_file_name())
+
+    def capture(self):
+        str_protocol_options = ''
+        if self.transport != None:
+            str_protocol_options = ' and ' + self.transport
+	if self.port != None:
+            if str_protocol_options.find('and') == -1:
+                str_protocol_options += ' and '
+            str_protocol_options += ' port ' + self.port
+
+        tcpdump_cmd = "tcpdump -v -i any -w %s net %s %s" % (self.capture_file_path(),
+                                                             self.net_address,
+                                                             str_protocol_options)
+        boscliutils.InteractiveCommand(tcpdump_cmd)
+
+}}}
+
+
+Now we use the '''Capturer''' to implement capscli commands that capture the traffic.
+{{{
+#!python
+def bcli_capture_traffic_IP(line_words):
+    """Capture traffic with IP as a src or dst"""
+    ip = line_words[2]
+    capturer = Capturer(ip)
+    print "Use Ctr-C to stop the capture"
+    capturer.capture()
+
+def bcli_capture_traffic_IP_TRANSPROTO_INT(line_words):
+    """Capture traffic for a host and protocol  (transport proto and port)"""
+    ip = line_words[2]
+    transport = line_words[3]
+    port = line_words[4]
+    capturer = Capturer(ip, port, transport)
+    print "Use Ctr-C to stop the capture"
+    capturer.capture()
+
+def bcli_capture_traffic_CIDR(line_words):
+    """Capture traffic for a subnet"""
+    cidr = line_words[2]
+    capturer = Capturer(cidr)
+    print "Use Ctr-C to stop the capture"
+    capturer.capture()
+
+def bcli_capture_traffic_CIDR_TRANSPROTO_INT(line_words):
+    """Capture traffic for a subnet and protocol (transport proto and port)"""
+    cidr = line_words[2]
+    transport = line_words[3]
+    port = line_words[4]
+    capturer = Capturer(cidr, port, transport)
+    print "Use Ctr-C to stop the capture"
+    capturer.capture()
+}}}
+
+Last we define a command for reload the capscli server list.
+{{{
+#!python
+def bcli_capscli_conf_reload(line_words):
+    """Read/Parse capscli conf"""
+    print "Loading conf"
+    CapscliPlugin()
+    print "Conf loaded..."
+}}}
+
+Of course for more information about how to define boscli commands see [wiki:BoscliOss#Easynewcommanddefinition].
+
 === Define boscli commands using boscli file ===
-=== Create a script to start the shell ===
+
+We create the file '''/usr/lib/boscli/plugins/capscli/cmdcapscli.boscli''' with more commands for our '''capscli'''. 
+{{{
+[cmd]
+cmd=capture upload file:CAPSCLIDATAFILE to server:CAPSCLISERVER
+shell=scp /var/lib/capscli/${file} root@${server}:/tmp/
+doc=Upload capscli data file to a server
+
+[cmd]
+cmd=capture remove file:CAPSCLIDATAFILE
+shell=rm -i  /var/lib/capscli/${file}
+doc=Remove data file
+}}}
+
+If you need more information about how to define a '''boscli''' file see [wiki:BoscliOss#BoscliExtensionFiles]
+
 === Configure boscli to hide some default commands/features ===
+By default the boscli have a lot of predefined commands (See [wiki:BoscliOss#Alreadydefinedclifuncts]), but for capscli software we don't need all of them so we modify the configuration file '''/etc/capscli/capscli.conf''' and write a '''refusedfunctions''' with regular expressions for the the commands to hide (See wiki:BoscliOss#Deactivatealreadydefinedclifuncts for more info).
+In this case we put the following at the configuration file:
+{{{
+[refusedfunctions]
+noalias = alias*
+noremotehelp = remotehelp*
+nofullhelp = help show allcommands full
+nocli = cli*
+noconfigure = configure*
+noenable = enable
+nomanufacturer = manufacturer
+nopasswd = passwd*
+}}}
+
+
+With this configuration the commands accessible at capscli cli are:
+{{{
+capscli
+capscli conf reload
+capscli show servers
+capture
+capture remove <CAPSCLIDATAFILE>
+capture show
+capture traffic <CIDR>
+capture traffic <CIDR> <TRANSPROTO> <INT>
+capture traffic <IP>
+capture traffic <IP> <TRANSPROTO> <INT>
+capture upload <CAPSCLIDATAFILE> to <CAPSCLISERVER>
+exit
+help
+help basic
+help command <CMD>
+help extended command <CMD>
+help show allcommands
+help types
+}}}
+
+This list include the predefined commands minus the ''refusedfunctions'', plus the commands defined at python boscli extension, plus the commands defined at the ''boscli'' file.
+
+=== Create a script to start the shell ===
+Finally, in order to start the new cli ('''capscli¡''') we should use a boscli binary with some arguments. We can encapsulate this command line in a shell script. 
+
+We create '''/usr/bin/capscli.sh''' with the following contents:
+{{{
+#!/bin/sh
+boscli \
+    -a capscli \
+    -c /etc/capscli/capscli.conf \
+    /usr/lib/boscli/lib/ \
+    /usr/lib/boscli/plugins/capscli/
+}}}
+
+The arguments are:
+ * '''-a capscli''' we use the '''capscli''' name for the cli. This name will be used for history file, syslog messages, and so on.
+ * '''-c /etc/capscli/capscli.conf''' load the configuration file.
+ * '''/usr/lib/boscli/lib/''' to load the predefined commands.
+ * '''/usr/lib/boscli/plugins/capscli/''' to load the '''capscli''' plugin (capscli.py and cmdcampscli.boscli).
+
+
 === Test it! ===
-
-
-
+ * Download the tutorial source code from [http://oss.alea-soluciones.com/data/boscli-oss-basic-tutorial.tar.gz boscli-oss-basic-tutorial]. This code is also include at doc dir of the boscli-core source tarball.
+ * You can see the [http://oss.alea-soluciones.com/data/capscli.html screencast using capscli] for a feeling of the final '''capscli''' created in this tutorial.
