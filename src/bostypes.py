@@ -299,9 +299,12 @@ class BiferShellHexNumber(BiferShellType):
 class BiferGenericType(BiferShellType):
     def __init__(self, values_func, short_help = None):
         self.__values_func = values_func
-        doc = "Doc to be defined"
-        if self.__values_func.__doc__ != None:
-            doc = self.__values_func.__doc__
+        if short_help != None:
+            doc = short_help
+        else:
+            doc = "Doc to be defined"
+            if self.__values_func.__doc__ != None:
+                doc = self.__values_func.__doc__
         BiferShellType.__init__(self, doc)
         
     def validate_value(self, value):
@@ -329,6 +332,7 @@ class BiferOptionsType(BiferShellType):
 
 
 def test1(incomplete_word):
+    """Type documentation"""
     print "test1"
     print incomplete_word    
     return ['one', 'two']
@@ -350,3 +354,7 @@ if __name__ == '__main__':
     print type4.values('incomp')
     print type4.help()
     
+
+    type5 = BiferGenericType(test1, "with short help")
+    print type5.values('incomp')
+    print type5.help()
