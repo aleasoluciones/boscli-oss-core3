@@ -293,3 +293,60 @@ class BiferShellHexNumber(BiferShellType):
         except:
             return False
  
+
+
+
+class BiferGenericType(BiferShellType):
+    def __init__(self, values_func, short_help = None):
+        self.__values_func = values_func
+        doc = "Doc to be defined"
+        if self.__values_func.__doc__ != None:
+            doc = self.__values_func.__doc__
+        BiferShellType.__init__(self, doc)
+        
+    def validate_value(self, value):
+        return value in self.values('')
+
+    def values(self, incomplete_word):
+        return self.__values_func(incomplete_word)
+
+
+class BiferOptionsType(BiferShellType):
+    def __init__(self, options_list, doc = None):
+        self.__options = options_list
+        if doc == None:
+            doc = "Options %s" % str(self.__options)
+
+        BiferShellType.__init__(self, doc)
+        
+    def validate_value(self, value):
+        return value in self.values('')
+
+    def values(self, incomplete_word):
+        return self.__options
+
+
+
+
+def test1(incomplete_word):
+    print "test1"
+    print incomplete_word    
+    return ['one', 'two']
+
+if __name__ == '__main__':
+    type1 = BiferGenericType(test1)
+    print type1.values('incomp')
+    print type1.help()
+
+    type2 = BiferOptionsType(['Op1', 'Op2', 'Op3'])
+    print type2.values('incomp')
+    print type2.help()
+
+    type3 = BiferGenericType(lambda x: ['Op1', 'Op2'])
+    print type3.values('incomp')
+    print type3.help()
+
+    type4 = BiferOptionsType(['Op1', 'Op2', 'Op3'], "Options type example")
+    print type4.values('incomp')
+    print type4.help()
+    
