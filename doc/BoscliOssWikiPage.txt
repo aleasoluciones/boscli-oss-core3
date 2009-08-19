@@ -257,6 +257,43 @@ def bcli_apache_disable_SITEENABLED(line_words):
 }}}
 
 
+==== More options for create a new types ====
+If the new type we want to create, only need a fixed list of choices or options, is better to use the predefined '''!BiferOptionsType'''. We can register the new type with all the available options directly.
+
+Example:
+{{{
+#!python
+get_cli().add_type('TRANSPORT', BiferOptionsType(['tcp', 'udp'], "Transport protocols supported"))
+}}}
+
+The previous line register a new type '''TRANSPORT''' that can have the values '''tcp''' and '''udp'''. The !BiferOptionsType contructor parameters are:
+ * The list of available options for the type.
+ * The short doc used for interactive help.
+
+
+If we can define a function for return the available options and we don't want to change the default behaviour of the other methods !BiferShellType we can use the predefined class bostypes.!BiferGenericType that accept as constructor parameters:
+ * The function to generate the valid values for the type. Can be a lambda function.
+ * The short doc used for interactive help. If we don't use this parameters, the function doc would be used as short doc for the type.
+
+Example:
+{{{
+#!python
+
+def lang_selector(incomplete_word):
+    langs = ['english', 'spanish', 'Dutch', 'Danish'] 
+    return [l for l in langs if l.find(incomplete_word) != -1]
+
+get_cli().add_type('LANG', BiferGenericType(lang_selector, "Supported languages"))
+}}}
+
+
+Example with a lambda function:
+{{{
+#!python
+
+get_cli().add_type('LOWERWORDS', BiferGenericType(lambda incomplete_word: incomplete_word.lower(), "Lower case words"))
+}}}
+
 
 === Defining new Boscli Extension Files ===
 In order to define boscli commands that only use normal shell commands but with concrete parameter or using boscli defined types, we can use boscli files instead of define a boscli python extensions.
