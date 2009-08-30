@@ -761,7 +761,7 @@ Open a interactive Command Line Interface/Interpreter
 
 The valid options are:
 (The mandatory argument for "long format" options are also 
-mandatory for the correspondent sort option)
+mandatory for the correspondent short option)
       
   -h, --help 
       show this help

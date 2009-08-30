@@ -1,76 +1,29 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
 
-# Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+DEB_PYTHON_SYSTEM = pysupport
+DEB_PYTHON_COMPILE_VERSION = $(shell pyversions -vd 2>/dev/null)
+
+# Must be included before python-distutils.mk to use dh_python/dh_pysupport.
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+include /usr/share/cdbs/1/class/python-distutils.mk
+include /usr/share/cdbs/1/rules/utils.mk
+
+
+common-install-prehook-arch::
+	@# Remove unneeded files from the deb.
+
+binary-post-install::
+	@# Binary post install
+
+
+clean::
+	@# Clean
+
+# For /usr/share/cdbs/1/rules/utils.mk sanity check.
+common-binary-post-install-arch:: list-missing
 
 
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	# Add here commands to configure the package.
-
-	touch configure-stamp
-
-
-build: build-stamp
-
-build-stamp: configure-stamp 
-	dh_testdir
-
-	# Add here commands to compile the package.
-	$(MAKE)
-	#docbook-to-man debian/boscli-oss-core.sgml > boscli-oss-core.1
-
-	touch $@
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-
-	[ ! -f Makefile ] || $(MAKE) distclean
-
-	dh_clean 
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k 
-	dh_installdirs
-
-	# Add here commands to install the package into debian/boscli-oss.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/boscli-oss-core install
-
-
-# Build architecture-independent files here.
-binary-indep: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
-	dh_install
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-
-# Build architecture-dependent files here.
-binary-arch: build install
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure

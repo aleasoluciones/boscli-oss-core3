@@ -2,13 +2,18 @@ Source: boscli-oss-core
 Section: shells
 Priority: extra
 Maintainer: Eduardo Ferro Aldama <eferro@alea-soluciones.com>
-Build-Depends: debhelper (>= 5)
+Build-Depends: cdbs (>= 0.4.49),
+               debhelper (>= 5.0),
+               python,
+               python-support (>= 0.6)
 Standards-Version: 3.8.1
 Homepage: http://oss.alea-soluciones.com/trac/wiki/BoscliOss/
 
 Package: boscli-oss-core
-Architecture: all
-Depends: ${shlibs:Depends}, python
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         ${python:Depends}
 Suggests: boscli-oss-utils, boscli-oss-system, boscli-oss-asterisk
 Description: extensible command line processor for "ad hoc" shells creation
  The boscli-oss-core is the base infraestructure for creation of "ad hoc"

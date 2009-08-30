@@ -1,5 +1,0 @@
-#!/bin/bash
-
-LIB_DIR=/usr/lib/boscli
-python ${LIB_DIR}/main.py $*
-

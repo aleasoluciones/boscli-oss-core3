@@ -358,3 +358,8 @@ if __name__ == '__main__':
     type5 = BiferGenericType(test1, "with short help")
     print type5.values('incomp')
     print type5.help()
+
+    type6 = BiferGenericType(lambda incomplete_word: incomplete_word.lower(), "Lower case words")
+    print type6.values('inCOMPle')
+    print type6.help()
+    

@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.0-2) unstable; urgency=low
+
+  * Debian package rewrite (using python-support)
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Sun, 30 Aug 2009 16:41:33 +0200
+
 boscli-oss-core (0.2.0-1) unstable; urgency=low
 
   * Cleanups and code reestucture
