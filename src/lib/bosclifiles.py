@@ -19,14 +19,15 @@ import os
 import privileges
 
 
-def __shell_helper(line_words, func_params, shellcmdstr, interactive):
+def __shell_helper(shellcmdstr, interactive, func_params_names, *args):
     try:
         d = {}
-        for pname, ptype, pos in func_params:
-            d[pname] = line_words[pos]
+        for pos in range(len(func_params_names)):
+            d[func_params_names[pos]] = args[pos]
 
         s = string.Template(shellcmdstr)
         s = s.substitute(d)
+        
 
         # TODO if s contains ${<var>}, 
         # not all the vars were substituted so
@@ -50,10 +51,10 @@ class CommandDefiner():
         self.__def_dict = def_dict
 
         self.__templates['shell'] = """
-def ${func_name}(line_words):
+def ${func_name}(*args):
      \"\"\"${doc}
      \"\"\"
-     __shell_helper(line_words, ${func_params}, \"${shell}\", ${interactive})
+     __shell_helper(\"${shell}\", ${interactive}, ${func_params_names}, *args)
 
 
 get_cli().set_privilege(privileges.${priv},
@@ -68,6 +69,7 @@ get_cli().set_privilege(privileges.${priv},
         try:
             s = string.Template(self.__templates['shell'])
             code = s.substitute(self.__def_dict)
+
             exec(code, globals(), globals())
         except Exception,ex:
             print "ERROR", ex
@@ -92,6 +94,7 @@ get_cli().set_privilege(privileges.${priv},
 
     def __process_cmdstr(self):        
         self.__func_params = []
+        self.__func_params_names = []        
         func_name = "bcli"
         pos = 0
         for w in self.__def_dict['cmd'].split():
@@ -100,6 +103,7 @@ get_cli().set_privilege(privileges.${priv},
                 pname, ptype = w.split(':')
                 ptype = ptype.upper()
                 self.__func_params.append([pname, ptype, pos])
+                self.__func_params_names.append(pname)
                 func_name = func_name + '_' + ptype
             else:
                 # keyword
@@ -109,7 +113,7 @@ get_cli().set_privilege(privileges.${priv},
         self.__func_name = func_name
         self.__def_dict['func_name'] = self.__func_name
         self.__def_dict['func_params'] = self.__func_params
-
+        self.__def_dict['func_params_names'] = self.__func_params_names
 
 
 class BoscliFileParser():

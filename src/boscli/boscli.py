@@ -801,7 +801,7 @@ def handler(signum, frame):
         if cli.executing_command() == True:
             return
         try:
-            bcli_exit([])
+            bcli_exit()
         except NameError:
             # If there is no a bcli_exit function
             # defined, end execution

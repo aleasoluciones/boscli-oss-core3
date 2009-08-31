@@ -84,7 +84,17 @@ class CliFunctionsManager:
     def execute(self, function, args):
         str_function = '_'.join(function)
         f = self.__functions[str_function]
-        f(args)
+
+        # args contains the list of words typed by the user
+        # we should extract the list of parameters values.
+        # These values are the words corresponding to the
+        # types in the function name (uppercase words)
+        parameters = []
+        for pos in range(len(function)):
+            if function[pos] == function[pos].upper():
+                parameters.append(args[pos])
+        # finally, call the function with the parameter list
+        f(*parameters)
 
     def get_function(self, func_name):
         str_function = '_'.join(func_name)

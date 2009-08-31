@@ -38,23 +38,23 @@ get_cli().set_privilege(privileges.MANUF, privileges.NORMAL, 'bcli_passwd_priv_m
 
 
 
-def bcli_passwd(line_words):
+def bcli_passwd():
     """Change login password.
     """
     print "Changing system login password"
     boscliutils.InteractiveCommand("passwd %s" % get_user_name())
 
-def bcli_passwd_configuremode(line_words):
+def bcli_passwd_configuremode():
     """Change configure mode access password.
     """
     get_cli().change_mode_passwd(privileges.CONFIGURE)
 
-def bcli_passwd_priv_enable(line_words):
+def bcli_passwd_priv_enable():
     """Change configure enable privilege level password.
     """
     get_cli().change_priv_passwd(privileges.ENABLE)
 
-def bcli_passwd_priv_manufacturer(line_words):
+def bcli_passwd_priv_manufacturer():
     """Change configure manufacturer privilege level password.
     """
     get_cli().change_priv_passwd(privileges.MANUF)
@@ -98,18 +98,18 @@ def validate_change_mode(mode):
 #   manufacturer
 get_cli().set_privilege(privileges.ENABLE, privileges.NORMAL, 'bcli_disable')
 
-def bcli_enable(line_words):
+def bcli_enable():
     """Change privileges to enable level (level 1)
     """
     get_cli().change_priv(privileges.ENABLE)
 
 
-def bcli_manufacturer(line_words):
+def bcli_manufacturer():
     """Change privileges to manufacturer level (level 2)
     """
     get_cli().change_priv(privileges.MANUF)
 
-def bcli_disable(line_words):
+def bcli_disable():
     """Change privileges to 0 (initial level)
     """
     get_cli().change_priv(privileges.NONE)
@@ -123,7 +123,7 @@ def bcli_disable(line_words):
 #   normal
 get_cli().set_privilege(privileges.NONE, privileges.CONFIGURE, 'bcli_normal')
 
-def bcli_configure(line_words):
+def bcli_configure():
     """Change mode to configuremode
     """
     get_cli().change_mode(privileges.CONFIGURE)
@@ -131,7 +131,7 @@ def bcli_configure(line_words):
 # Usefull for users with cisco cli addiction
 bcli_configure_terminal = bcli_configure
 
-def bcli_normal(line_words):
+def bcli_normal():
     """Change mode to normal
     """
     get_cli().change_mode(privileges.NORMAL)
@@ -139,7 +139,7 @@ def bcli_normal(line_words):
 
 
 #---------------------------------------------------------------------------------
-def bcli_exit(line_words):
+def bcli_exit():
     """Exit from configure mode or from CLI (if we are at NORMAL mode).
     """
     if get_cli().get_mode() == privileges.NORMAL:
@@ -157,19 +157,19 @@ get_cli().set_privilege(privileges.MANUF, privileges.NORMAL, 'bcli_privilege_ini
 get_cli().set_privilege(privileges.MANUF, privileges.NORMAL, 'bcli_privilege_initial_manufacturer')
 get_cli().set_privilege(privileges.MANUF, privileges.NORMAL, 'bcli_privilege_initial_normal')
 
-def bcli_privilege_initial_enable(line_words):
+def bcli_privilege_initial_enable():
     """Set enable level as initial privilege level for actual user
     """
     get_cli().change_initial_privilege(privileges.ENABLE)
     print "Inital user privileges change to: 1 [enable level]"
 
-def bcli_privilege_initial_manufacturer(line_words):
+def bcli_privilege_initial_manufacturer():
     """Set manufacturer level as initial privilege level for actual user
     """
     get_cli().change_initial_privilege(privileges.MANUF)
     print "Inital user privileges change to: 2 [manufacturer level]"
 
-def bcli_privilege_initial_normal(line_words):
+def bcli_privilege_initial_normal():
     """Set normal level as initial privilege level for actual user
     """
     get_cli().change_initial_privilege(privileges.NONE)

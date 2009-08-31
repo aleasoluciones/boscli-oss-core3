@@ -30,12 +30,12 @@ class BiferShellAliasType(bostypes.BiferShellType):
 get_cli().add_type('ALIAS', BiferShellAliasType())
 
 
-def bcli_cli(line_words):
+def bcli_cli():
     """Commands for interact with the BosCli itself.
     """    
     pass
 
-def bcli_cli_pager(line_words):
+def bcli_cli_pager():
     """Show if the pager is active or not.
     """
     if get_cli().pager() == True:
@@ -43,27 +43,26 @@ def bcli_cli_pager(line_words):
     else:
         print "Pager status: OFF"
 
-def bcli_cli_pager_STATE(line_words):
+def bcli_cli_pager_STATE(state):
     """Activate or Deactivate the command output pager.
     """
-    state = line_words[2]
     if state in ['on', 'up']:
         get_cli().pager_on()
     else:
         get_cli().pager_off()
     
-def bcli_cli_exec_FILE(line_words):
+def bcli_cli_exec_FILE(file):
     """Execute a BosCli file.
     """
-    get_cli().exec_cmds_file(line_words[2])
+    get_cli().exec_cmds_file(file)
         
-def bcli_cli_quit(line_words):
+def bcli_cli_quit():
     """Exit from BosCli.
     """
     get_cli().quit()
 
 
-def bcli_cli_history(line_words):
+def bcli_cli_history():
     """Show comand history.
     """
     print "Cmds history..."
@@ -76,13 +75,13 @@ def bcli_cli_history(line_words):
         print "%5d  '%s'" % (num, item)
         num = num + 1
                 
-def bcli_cli_history_clear(line_words):
+def bcli_cli_history_clear():
     """Clear/Reset command history.
     """
     readline.clear_history()
     print "history cleared"
 
-def bcli_cli_reload(line_words):
+def bcli_cli_reload():
     """Reload all the functions registered at CLI.
     Only for internal use.
     """
@@ -91,30 +90,30 @@ def bcli_cli_reload(line_words):
 
 
 
-def bcli_alias(line_words):
+def bcli_alias():
     """Commands for define alias.
     """    
     pass
 
 
-def bcli_alias_list(line_words):
+def bcli_alias_list():
     """Show defined aliases and the corresponding values.
     """
     alias = get_cli().get_alias()
     for alias_name in alias.keys():
         print "%s => %s" % (alias_name, alias[alias_name])
         
-def bcli_alias_define_STRING_STRING(line_words):
+def bcli_alias_define_STRING_STRING(alias_name, alias_value):
     """Define/Overwrite an alias.
     Set the value of the alias to the string especified as second argument. 
     """
-    get_cli().add_alias('@' + line_words[2], line_words[3])
-    print "%s => %s" % ('@' + line_words[2], line_words[3])
+    get_cli().add_alias('@' + alias_name, alias_value)
+    print "%s => %s" % ('@' + alias_name, alias_value)
         
-def bcli_alias_remove_ALIAS(line_words):
+def bcli_alias_remove_ALIAS(alias_name):
     """Remove the asigned value for an alias.
     """
-    alias = '@' + line_words[2]
+    alias = '@' + alias_name
     if alias not in get_cli().get_alias().keys():
         print "%s not defined" % (alias)
     else:    

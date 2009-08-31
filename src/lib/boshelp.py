@@ -31,13 +31,13 @@ def get_functions(cmd):
     return matchs
 
 
-def bcli_help(line_words):
+def bcli_help():
     """Commands for interactive help.
     """    
     get_cli().basic_help()
 
 
-def bcli_help_show_allcommands_full(line_words):
+def bcli_help_show_allcommands_full():
     """Show basic help for all availables commands (only for active mode).
     """
     cmd_list = []
@@ -51,7 +51,7 @@ def bcli_help_show_allcommands_full(line_words):
     
     
     
-def bcli_help_show_allcommands(line_words):
+def bcli_help_show_allcommands():
     """Show a list of all available commands (only for active mode).
     """    
     cmd_list = []
@@ -61,33 +61,31 @@ def bcli_help_show_allcommands(line_words):
     for cmd in cmd_list:
         print cmd
 
-def bcli_help_basic(line_words):
+def bcli_help_basic():
     '''Show basic help. Same as '?<tab>' at command lines
     '''
     get_cli().basic_help()
     
-def bcli_help_command_CMD(line_words):
+def bcli_help_command_CMD(cmd):
     '''Show short help of the (active) functions corresponding to the command expecified.
     The short help only contain a line with a general description of the command.
     '''
-    cmd = line_words[2]
     if cmd not in get_active_cmds():
         print "There is no command named %s" % cmd
     else:
         print get_basic_help(cmd).strip()
 
-def bcli_help_extended_command_CMD(line_words):
+def bcli_help_extended_command_CMD(cmd):
     '''Show extendeed help of the (active) functions corresponding to the command expecified.
     The extended help have all the info available at the BCli User Manual.
     '''
-    cmd = line_words[3]
     if cmd not in get_active_cmds():
         print "There is no command named %s" % cmd
     else:
         print get_extended_help(cmd).strip()
 
 
-def bcli_help_types(line_words):
+def bcli_help_types():
     '''Show help for type/vars used in CLI commands.
     '''
     types = get_cli().get_type_names()
@@ -127,13 +125,13 @@ def get_extended_help(cmd):
 
 
 
-def bcli_remotehelp_connect(line_words):
+def bcli_remotehelp_connect():
     """Remote help mode related commands
     """
     pass
 
 
-def bcli_remotehelp_act(line_words):
+def bcli_remotehelp_act():
      """Activate remote help mode. 
      """    
      print "Starting remotehelp mode"
@@ -141,7 +139,7 @@ def bcli_remotehelp_act(line_words):
      boscliutils.InteractiveCommand("screen -S bcli")
  
  
-def bcli_remotehelp_connect(line_words):
+def bcli_remotehelp_connect():
      """Connect to an active remote help session.
      Use remotehelp act in other terminal to activate remote session.
      """    

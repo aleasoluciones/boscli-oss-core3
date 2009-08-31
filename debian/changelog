@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.1-1) unstable; urgency=low
+
+  * Normal parameters for bcli functions
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Mon, 31 Aug 2009 08:00:46 +0200
+
 boscli-oss-core (0.2.0-2) unstable; urgency=low
 
   * Debian package rewrite (using python-support)
