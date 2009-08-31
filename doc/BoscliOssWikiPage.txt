@@ -30,6 +30,21 @@ The main features are:
   * Filters
   * Command history
 
+== Version History ==
+
+=== boscli-oss-core 0.2.1 ===
+  * Bugfix
+  * Normal parameters for bcli functions
+  * Improved docs
+
+=== boscli-oss-core 0.2.0 ===
+  * Debian package rewrite (using python-support)
+  * Cleanups and code reestucture
+  * Added tutorial
+  * Improved docs
+
+=== boscli-oss-core 0.1.9 ===
+  * Initial release
 
 === Predefined boscli-oss-core commands ===
 
@@ -448,4 +463,6 @@ svn co http://oss.alea-soluciones.com/svn/boscli-oss/boscli-oss-core
 
 Download the latest stable version from [http://oss.alea-soluciones.com/download/boscli/releases/boscli-oss_latest.tar.gz]
 
-Download the binary deb from [http://oss.alea-soluciones.com/download/boscli/releases/boscli-oss-core_0.2.0-1_all.deb]
+Download the binary deb from [http://oss.alea-soluciones.com/download/boscli/releases/deb/boscli-oss-core_0.2.1-1_i386.deb]
+
+Download the deb source from [http://oss.alea-soluciones.com/download/boscli/releases/deb/]
