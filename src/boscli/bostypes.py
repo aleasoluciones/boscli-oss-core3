@@ -277,7 +277,7 @@ class BiferShellCmd(BiferShellType):
             return []
         else:
             functions = self.cli.get_functions()
-            cmds = sorted(list(set([a.split('_')[1] for a in functions])))
+            cmds = sorted(list(set([a.split('_')[0] for a in functions])))
             return cmds
 
 
