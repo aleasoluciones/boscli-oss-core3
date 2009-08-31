@@ -127,23 +127,23 @@ Continuing with the definition of '''capscli.py''' we define some very simple co
 
 {{{
 #!python
-def bcli_capscli(line_words):
+def bcli_capscli():
     """Capscli itself related commands"""
     # this command only add doc for top level interactive help
     pass
 
-def bcli_capture(line_words):
+def bcli_capture():
     """Commands for traffic capture and capture files management"""
     # this command only add doc for top level interactive help
     pass
 
-def bcli_capscli_show_servers(line_words):
+def bcli_capscli_show_servers():
     """Show/list configured servers for capscli"""
     print "Configured capscli servers:"
     for server in CapscliPlugin.Servers:
         print server
 
-def bcli_capture_show(line_words):
+def bcli_capture_show():
     """Show/list captures data files"""
 
     print "Captures data files:"
@@ -193,34 +193,26 @@ class Capturer():
 Now we use the '''Capturer''' to implement capscli commands that capture the traffic.
 {{{
 #!python
-def bcli_capture_traffic_IP(line_words):
+def bcli_capture_traffic_IP(ip):
     """Capture traffic with IP as a src or dst"""
-    ip = line_words[2]
     capturer = Capturer(ip)
     print "Use Ctr-C to stop the capture"
     capturer.capture()
 
-def bcli_capture_traffic_IP_TRANSPROTO_INT(line_words):
+def bcli_capture_traffic_IP_TRANSPROTO_INT(ip, transport, port):
     """Capture traffic for a host and protocol  (transport proto and port)"""
-    ip = line_words[2]
-    transport = line_words[3]
-    port = line_words[4]
     capturer = Capturer(ip, port, transport)
     print "Use Ctr-C to stop the capture"
     capturer.capture()
 
-def bcli_capture_traffic_CIDR(line_words):
+def bcli_capture_traffic_CIDR(cidr):
     """Capture traffic for a subnet"""
-    cidr = line_words[2]
     capturer = Capturer(cidr)
     print "Use Ctr-C to stop the capture"
     capturer.capture()
 
-def bcli_capture_traffic_CIDR_TRANSPROTO_INT(line_words):
+def bcli_capture_traffic_CIDR_TRANSPROTO_INT(cidr, transport, port):
     """Capture traffic for a subnet and protocol (transport proto and port)"""
-    cidr = line_words[2]
-    transport = line_words[3]
-    port = line_words[4]
     capturer = Capturer(cidr, port, transport)
     print "Use Ctr-C to stop the capture"
     capturer.capture()
@@ -229,7 +221,7 @@ def bcli_capture_traffic_CIDR_TRANSPROTO_INT(line_words):
 Last we define a command for reload the capscli server list.
 {{{
 #!python
-def bcli_capscli_conf_reload(line_words):
+def bcli_capscli_conf_reload():
     """Read/Parse capscli conf"""
     print "Loading conf"
     CapscliPlugin()

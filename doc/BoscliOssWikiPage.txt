@@ -120,20 +120,16 @@ For example:
 
 {{{
 #!python
-def def bcli_cli_history(line_words):
+def def bcli_cli_history():
     pass
 
-def bcli_help_command_CMD(line_words):
-    param_cmd = line_words[2]
+def bcli_help_command_CMD(param_cmd):
     pass
 
-def bcli_cli_pager_STATE(line_words):
-    param_state = line_words[2]
+def bcli_cli_pager_STATE(param_state):
     pass
 
-def bcli_alias_define_STRING_STRING(line_words):
-    param_string1 = line_words[2]
-    param_string2 = line_words[3]
+def bcli_alias_define_STRING_STRING(param_string1, param_string2):
     pass
 }}}
 
@@ -161,18 +157,16 @@ Use examples:....
 import boscliutils
 
 
-def bcli_util_tracepath_IPHOST(line_words):
+def bcli_util_tracepath_IPHOST(host):
     """Show tracepath to the host
     """
-    host = line_words[2]
     print "Press Ctrl-C to quit"
     print ""
     boscliutils.BatchCommand("tracepath %s" % host)
 
 
-def bcli_util_edit_FILE(line_words):
+def bcli_util_edit_FILE(file):
     """Edit file"""
-    file = line_words[2]
     boscliutils.InteractiveCommand("nano %s" % file)
 }}}
 
@@ -199,7 +193,7 @@ get_cli().register_exit_funct(example_plugin_exit)
 
 get_cli().set_privilege(privileges.ENABLE, privileges.NORMAL, 'bcli_explugin_enable_cmd')
 
-def bcli_explugin_enable_cmd(line_words):
+def bcli_explugin_enable_cmd():
     """Example command for enable mode"""
     pass
 
@@ -248,10 +242,9 @@ Now, we can use this new type for new command definition. For example:
 
 {{{
 #!python
-def bcli_apache_disable_SITEENABLED(line_words):
+def bcli_apache_disable_SITEENABLED(site):
     """Disable apache2 site (and reload conf)
     """
-    site = line_words[2]
     print "Disabling apache2 site %s" % site
     boscliutils.apache_disable_site(site)
 }}}
