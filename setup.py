@@ -10,7 +10,7 @@ setup(
     author='Eduardo Ferro Aldama', 
     author_email='eferro@alea-soluciones.com', 
     url='http://oss.alea-soluciones.com/trac/wiki/BoscliOss', 
-    desctiption ='Extensible command line processor for "ad hoc" shells creation',
+    description ='Extensible command line processor for "ad hoc" shells creation',
     license='GPL',
     platforms = 'Linux',
     classifiers = [
