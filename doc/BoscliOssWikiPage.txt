@@ -436,7 +436,7 @@ noremotehelp = remotehelp*
 nofullhelp = help show allcommands full
 }}}
 
-In the '''refusedfunctions''' section, the keys (in this case noalias, noremotehelp and nofullhelp) have no meaning and are not used by the boscli, but '''they must be uniques''' (you can use the same key in two different lines).
+In the '''refusedfunctions''' section, the keys (in this case noalias, noremotehelp and nofullhelp) have no meaning and are not used by the boscli, but '''they must be uniques''' (you can't use the same key in two different lines).
 Another important point, is that the value can me a regular expression (like remotehelp*) or can be a complete funct name.
 
 
