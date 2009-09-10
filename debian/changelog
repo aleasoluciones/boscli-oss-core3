@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.2-1) unstable; urgency=low
+
+  * support autocompletion / interactive help, even if the user use abbreviations
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Thu, 10 Sep 2009 08:58:49 +0200
+
 boscli-oss-core (0.2.1-1) unstable; urgency=low
 
   * Normal parameters for bcli functions

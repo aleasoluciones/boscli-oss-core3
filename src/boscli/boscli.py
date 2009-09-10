@@ -716,7 +716,10 @@ class BiferShell:
             return True
         if len(function) >= len(prev_words):
             for pos in range(0, len(prev_words)):
-                if function[pos] == prev_words[pos]:
+                if function[pos].startswith(prev_words[pos]):
+                    # accept abbreviations of the function word
+                    # See #61
+                    
                     # Ok. lets continue
                     continue
                 elif self.type_manager.is_type(function[pos]) and \
