@@ -1,0 +1,48 @@
+boscli-oss-core (0.2.2-1) unstable; urgency=low
+
+  * support autocompletion / interactive help, even if the user use abbreviations
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Thu, 10 Sep 2009 08:58:49 +0200
+
+boscli-oss-core (0.2.1-1) unstable; urgency=low
+
+  * Normal parameters for bcli functions
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Mon, 31 Aug 2009 08:00:46 +0200
+
+boscli-oss-core (0.2.0-2) unstable; urgency=low
+
+  * Debian package rewrite (using python-support)
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Sun, 30 Aug 2009 16:41:33 +0200
+
+boscli-oss-core (0.2.0-1) unstable; urgency=low
+
+  * Cleanups and code reestucture
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Wed, 12 Aug 2009 03:49:28 +0200
+
+boscli-oss-core (0.1.9-5) unstable; urgency=low
+
+  * dummy script for force to use python 2.5
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Wed, 27 May 2009 17:04:03 +0200
+
+boscli-oss-core (0.1.9-3) unstable; urgency=low
+
+  * Minor bugfix
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Fri, 15 May 2009 21:57:20 +0200
+
+boscli-oss-core (0.1.9-2) unstable; urgency=low
+
+  * Minor cleanup
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Sun, 10 May 2009 22:09:16 +0200
+
+boscli-oss-core (0.1.9-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Tue, 05 May 2009 08:20:05 +0200
+
