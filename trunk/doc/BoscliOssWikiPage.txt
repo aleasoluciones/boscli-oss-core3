@@ -440,14 +440,3 @@ For a basic tutorial of how can you create yout own interactive shell see [wiki:
 
 For a Screencast Demo of BoscliOss extension for Asterisk See [http://oss.alea-soluciones.com/files/screencasts/demo-boscli-oss-asterisk.html] 
 
-== download ==
-To download the svn development version from Alea Soluciones anonymous SVN execute the following command:
-{{{
-svn co http://oss.alea-soluciones.com/svn/boscli-oss/boscli-oss-core
-}}}
-
-Download the latest stable version from [http://oss.alea-soluciones.com/download/boscli/releases/boscli-oss_latest.tar.gz]
-
-Download the binary deb from [http://oss.alea-soluciones.com/download/boscli/releases/deb/boscli-oss-core_0.2.1-1_i386.deb]
-
-Download the deb source from [http://oss.alea-soluciones.com/download/boscli/releases/deb/]
