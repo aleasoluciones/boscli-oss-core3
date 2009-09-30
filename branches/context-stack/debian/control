@@ -1,0 +1,27 @@
+Source: boscli-oss-core
+Section: shells
+Priority: extra
+Maintainer: Eduardo Ferro Aldama <eferro@alea-soluciones.com>
+Build-Depends: cdbs (>= 0.4.49),
+               debhelper (>= 5.0),
+               python,
+               python-support (>= 0.6)
+Standards-Version: 3.8.1
+Homepage: http://oss.alea-soluciones.com/trac/wiki/BoscliOss/
+
+Package: boscli-oss-core
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         ${python:Depends}
+Suggests: boscli-oss-utils, boscli-oss-system, boscli-oss-asterisk
+Description: extensible command line processor for "ad hoc" shells creation
+ The boscli-oss-core is the base infraestructure for creation of "ad hoc"
+ shells or command line interfaces using Python.
+ .
+ The boscli-oss-core include a useless shell with a minumun set of commands.
+ These commands have general pourpose, as shell history control, access 
+ control, etc.
+ This shell can be extended using plugins that will be loaded during the shell
+ startup.
+

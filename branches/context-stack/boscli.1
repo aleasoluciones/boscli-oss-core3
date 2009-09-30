@@ -1,0 +1,69 @@
+.TH BOSCLI "1" "August 2009" "boscli" "User Commands"
+.SH NAME
+\fBboscli\fR run a shell created using boscli\-oss framework
+.SH SYNOPSIS
+\fBboscli\fR [OPTIONS] [extdir1 extdir2 ...]
+.SH DESCRIPTION
+
+Boscli is a framework to create interactive command line interfaces. Our mission is to help developers write interactive shells for domain specific task. It provides an easy way to wrap and join together command line apps and utilities and create specific shells with security levels and modes, history, auto-completion and so on.
+.PP
+Using this framework any developer can build an interactive command line interface for configuration or monitor an appliance in a few minutes. 
+
+.SH OPTIONS
+.PP
+(The mandatory argument for "long format" options are also
+mandatory for the correspondent short option)
+.PP
+\fBThe valid options are:\fR
+.HP
+\fB\-h\fR, \fB\-\-help\fR
+.IP
+show this help
+.HP
+\fB\-a\fR, \fB\-\-name\fR
+.IP
+boscli instance name. Used for separate conf/history files,
+and to identify log messages.
+.HP
+\fB\-c\fR, \fB\-\-conf\fR = path
+.IP
+load the specified file as configuration. The configuration
+file is used basically to deactivate already defined boscli
+functions
+.HP
+\fB\-n\fR, \fB\-\-nopasswd\fR
+.IP
+don't ask for the password when change to a "mode" if we are root.
+.HP
+\fB\-f\fR, \fB\-\-file\fR = path
+.IP
+read and execute the commands in this file before enter
+in interactive mode.
+.HP
+\fB\-v\fR, \fB\-\-verbose\fR
+.IP
+log more info to system log
+.HP
+\fB\-d\fR, \fB\-\-debug\fR
+.IP
+log debug messages to system log
+.PP
+
+
+
+.SH AUTHOR
+Written by Eduardo Ferro Aldama.
+.SH "REPORTING BUGS"
+Report bugs to <eferro@alea-soluciones.com>.
+.SH COPYRIGHT
+Copyright \(co Alea Soluciones (Bifer) 2007, 2008, 2009 License
+GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+.SH "SEE ALSO"
+More info (docs, examples, tutorials) at Boscli homepage:
+.PP
+http://oss.alea\-soluciones.com/trac/wiki/BoscliOss
+

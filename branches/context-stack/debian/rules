@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+DEB_PYTHON_SYSTEM = pysupport
+DEB_PYTHON_COMPILE_VERSION = $(shell pyversions -vd 2>/dev/null)
+
+# Must be included before python-distutils.mk to use dh_python/dh_pysupport.
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+include /usr/share/cdbs/1/class/python-distutils.mk
+include /usr/share/cdbs/1/rules/utils.mk
+
+
+common-install-prehook-arch::
+	@# Remove unneeded files from the deb.
+
+binary-post-install::
+	@# Binary post install
+
+
+clean::
+	@# Clean
+
+# For /usr/share/cdbs/1/rules/utils.mk sanity check.
+common-binary-post-install-arch:: list-missing
+
+
+
