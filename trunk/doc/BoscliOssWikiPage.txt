@@ -30,21 +30,6 @@ The main features are:
   * Filters
   * Command history
 
-== Version History ==
-
-=== boscli-oss-core 0.2.1 ===
-  * Bugfix
-  * Normal parameters for bcli functions
-  * Improved docs
-
-=== boscli-oss-core 0.2.0 ===
-  * Debian package rewrite (using python-support)
-  * Cleanups and code reestucture
-  * Added tutorial
-  * Improved docs
-
-=== boscli-oss-core 0.1.9 ===
-  * Initial release
 
 === Predefined boscli-oss-core commands ===
 
