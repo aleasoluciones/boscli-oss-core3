@@ -577,7 +577,8 @@ class BiferShell:
         # name, so the help only show the rest of the funct name
         num_context_words = len(self.__cliFunctionsManager.context().split())
         f_name = " ".join(f_name.split()[num_context_words:]).strip()
-        
+        if f_name == '':
+            return None
         return "'%s' => %s" % (f_name, f_help)
             
     def basic_help(self):
@@ -596,9 +597,13 @@ class BiferShell:
             if self.match(f, prev_words):
                 try:
                     if f[len(prev_words)].startswith(partial_word):
-                        help_lines.append(self.get_basic_help_str(f))
+                        help = self.get_basic_help_str(f)
+                        if help != None:
+                            help_lines.append(self.get_basic_help_str(f))
                 except IndexError:
-                    help_lines.append(self.get_basic_help_str(f))
+                    help = self.get_basic_help_str(f)
+                    if help != None:
+                        help_lines.append(self.get_basic_help_str(f))
         if len(help_lines) == 0:
             print "No help available"
         else:
