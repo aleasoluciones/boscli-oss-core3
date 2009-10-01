@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.3-1) unstable; urgency=low
+
+  * 
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Wed, 30 Sep 2009 12:31:22 +0200
+
 boscli-oss-core (0.2.2-1) unstable; urgency=low
 
   * support autocompletion / interactive help, even if the user use abbreviations

@@ -96,6 +96,28 @@ class BiferShell:
         self.clear_filter()
         self.in_command_execution = False
 
+    def push_context(self, context):
+        self.__cliFunctionsManager.push_context(context)
+        self.set_prompt()
+        dynamic_pop_funct = 'dynbcli_%s_exit' % get_cli().context().replace(" ", "_")
+        self.add_function(dynamic_pop_funct, self.context_pop)
+
+    def context_pop(self):
+        """Exit from current mode"""
+        dynamic_pop_funct = 'dynbcli_%s_exit' % get_cli().context().replace(" ", "_")
+        self.remove_function(dynamic_pop_funct)
+        self.pop_context()
+        self.set_prompt()
+
+
+    def context(self):
+        return self.__cliFunctionsManager.context()
+
+
+    def pop_context(self):
+        self.__cliFunctionsManager.pop_context()
+
+
     def register_exit_funct(self, func):
          self.__exit_functs.append(func)
 
@@ -406,7 +428,14 @@ class BiferShell:
             print e
         finally:
             self.in_command_execution = False
-        
+    
+    def normalize_line(self, line):
+        """Return the user line but with modifications forn context and show on.
+        If we have context, the line returned included the corresponding text
+        for the initial line and the context
+        """
+        return (self.context() + " " + line)
+
     def onecmd(self, line):
         if line == 'EOF':
             self.quit()
@@ -417,7 +446,7 @@ class BiferShell:
             self.lastcommandhelp = True
         else:
             try:
-                line = line.strip()
+                line = self.normalize_line(line).strip()
                 if line == '':
                     return None
                 ret = self.select_execute(line)
@@ -541,7 +570,15 @@ class BiferShell:
     def get_basic_help_str(self,f):
         f_name = self.get_normalize_func_name(f)
         f_help = get_function_help(f).split('\n')[0]
-        return "%s => %s" % (f_name, f_help)
+        
+        
+        # If we have a context defined we remove the
+        # corresponding words of the context from the funct
+        # name, so the help only show the rest of the funct name
+        num_context_words = len(self.__cliFunctionsManager.context().split())
+        f_name = " ".join(f_name.split()[num_context_words:]).strip()
+        
+        return "'%s' => %s" % (f_name, f_help)
             
     def basic_help(self):
         self.interactive_help([], '')
@@ -574,11 +611,11 @@ class BiferShell:
         # Check for empty line, and for a space after the last word
         if line[-1:] == ' ' or line[-1:] == '':
             # We don't have incomplete_word
-            previous_words = line.split()
+            previous_words = self.normalize_line(line).split()
             incomplete_word = ''
         else:
-            previous_words = line.split()[:-1]
-            incomplete_word = line.split()[-1:][0]            
+            previous_words = self.normalize_line(line).split()[:-1]
+            incomplete_word = self.normalize_line(line).split()[-1:][0]            
 
         self.interactive_help(previous_words, incomplete_word)
         # Save this line for restore it
@@ -638,7 +675,7 @@ class BiferShell:
                 # We are not completing a word
                 # If the actual word is empty the previous are all
                 # the words
-                previous_words = line.split()
+                previous_words = self.normalize_line(line).split()
                 self.matches = self.next_words(previous_words, '')
                 return self.matches[0]                
                 
@@ -652,7 +689,7 @@ class BiferShell:
                 else:
                     # If the actual word is NOT empty the previous are all
                     # the words minus the actual word
-                    previous_words = line.split()[:-1]
+                    previous_words = self.normalize_line(line).split()[:-1]
                     self.matches = self.complete_word(previous_words, word_to_complete)
 
                     if len(self.matches) == 1:
@@ -682,6 +719,7 @@ class BiferShell:
         return self.type_manager.validate_value(type_name, value)
 
     def next_words(self, prev_words,  incomplete_word):
+        
         num_words = len(prev_words)
         match_list = []
         # Validate 

@@ -35,6 +35,7 @@ class Privileges:
 
 class CliFunctionsManager:
     def __init__(self, name, refusedfunctions):
+        self.__context = []
         self.__name = name
         self.__refusedfunctions = refusedfunctions
         self.__prompts = {
@@ -184,10 +185,30 @@ class CliFunctionsManager:
         funct.sort()
         return funct
 
+    #------------------------------------------------
+    def push_context(self, context):
+        self.__context.append(context)        
+
+    def pop_context(self):
+        try:
+            return self.__context.pop()
+        except IndexError:
+            # Poping from empty stack
+            return ""
+
+    def context(self):
+        return " ".join(self.__context)
+    #------------------------------------------------        
+
+
     def context_info(self):
-        return "%d [%s] %s%s" % (self.__priv, 
+        context = self.context()
+        if context == "":
+            context = self.__mode
+            
+        return "%d [%s] (%s)%s" % (self.__priv, 
                                  self.__priv_names[self.__priv],
-                                 self.__mode,
+                                 context,
                                  self.__prompts[self.__priv])
 
 
