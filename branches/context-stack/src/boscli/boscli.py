@@ -433,7 +433,13 @@ class BiferShell:
         """Return the user line but with modifications forn context and show on.
         If we have context, the line returned included the corresponding text
         for the initial line and the context
+        If we have a context, the '*' as the first caracter of the line indicate that
+        that line don't use the context, so in that case whe only return the line 
+        whitout this initial character
         """
+
+        if len(line)>0 and line[0] == '*':
+            return line[1:]
         return (self.context() + " " + line)
 
     def onecmd(self, line):
