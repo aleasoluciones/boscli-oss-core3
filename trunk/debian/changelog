@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.3-1ubuntu1) lucid; urgency=low
+
+  * Upgraded to lucid
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Sun, 30 May 2010 07:51:23 +0200
+
 boscli-oss-core (0.2.3-1) unstable; urgency=low
 
   * Support for stackable contexts (Cisco like contexts)
