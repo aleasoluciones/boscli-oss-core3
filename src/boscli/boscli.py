@@ -51,13 +51,15 @@ class BiferShell:
                  name,
                  confpath,
                  nopasswd_superuser,
-                 extensions):         
+                 extensions,
+                 debug=False):         
 
         if BiferShell.instance != None:
             raise RuntimeError("BiferShell is a Singleton. So is ilegal to try to instanciate twice")
         # register singleton instance
         BiferShell.instance = self
 
+        self.__debug = debug
         self.__name = name
         self.__confpath = confpath
         refusedfunctions = []
@@ -414,6 +416,12 @@ class BiferShell:
                 self.__cliFunctionsManager.execute(function, args)
             except ValueError, ex:
                 print "Can't be processed. ", ex
+            except Exception, ex:
+                print "CLI Cmd execution failed: '%s'" % line
+                boscliutils.Log.debug("CLI Cmd execution failed: '%s'" % line)
+                if self.__debug:
+                    import traceback
+                    traceback.print_exc(file=sys.stderr)
 
             if filter != None:
                 self.clear_filter()
@@ -479,8 +487,8 @@ class BiferShell:
     
     def default(self, line):
         if line != None:
-            print "Sintax Error. Unknow command '%s'" % (line)
-            boscliutils.Log.debug( "Sintax Error. Unknow command '%s'" % (line))
+            print "Syntax Error. Unknow command '%s'" % (line)
+            boscliutils.Log.debug( "Syntax Error. Unknow command '%s'" % (line))
 
         return False       
         
@@ -914,7 +922,7 @@ def main():
  
 
     # Open new CLI in normal mode
-    cli = BiferShell(name, confpath, nopasswd_superuser, args)
+    cli = BiferShell(name, confpath, nopasswd_superuser, args, debug)
     if command_file: cli.exec_cmds_file(command_file)    
     
     boscliutils.Log.info("Entering in interactive mode")
