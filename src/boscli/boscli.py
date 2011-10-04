@@ -23,6 +23,7 @@ import boscliutils
 import privileges
 import string
 import ConfigParser
+import glob
 
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
@@ -192,17 +193,15 @@ class BiferShell:
             if not os.path.isdir(ext):
                 boscliutils.Log.error("'%s' is not a extension dir" % ext, None)
             boscliutils.Log.debug("'%s' ext dir loading" % ext)
-            for root, dirs, files in os.walk(ext):
-                for file_path in [os.path.join(root, f) for f in files if f.endswith('.py')]:
-                    try:
-                        self.import_cmds_file(file_path.strip())
-                        boscliutils.Log.debug("'%s' imported" % file_path)
-                    except IOError, ex:
-                        boscliutils.Log.warning("Can access to '%s' extension file" % file_path)
-                    except Exception, ex:
-                        module_str = "Module '%s' import error" % os.path.basename(file_path.strip())[:-3]
-                        boscliutils.Log.error(module_str, ex)
-
+            for entry in glob.glob(os.path.join(ext, "*.py")):
+                try:
+                    self.import_cmds_file(entry)
+                    boscliutils.Log.debug("'%s' imported" % entry)
+                except IOError, ex:
+                    boscliutils.Log.warning("Can access to '%s' extension file" % entry)
+                except Exception, ex:
+                    module_str = "Module '%s' import error" % os.path.basename(entry.strip())[:-3]
+                    boscliutils.Log.error(module_str, ex)
 
     def init_readline(self):
         init_file = os.path.expanduser("~/.%s-init" % self.__name)
