@@ -275,7 +275,7 @@ class FilterOut:
             self.__line = 1
     
         # Write the real line
-        self.__out.write(line)
+        self.__out.write(line + '\n')
         self.__out.flush()
         self.__line = self.__line + 1
 
@@ -291,12 +291,10 @@ class FilterOut:
         self.__text = self.__text + text
         if self.__text[-1:] != '\n':
             return
-        lines = self.__text.split('\n')
+        lines = self.__text.splitlines()
         for l in lines:
-            if l == '':
-                continue
             if self.validate_line(l):
-                self.output_line(l + '\n')
+                self.output_line(l)
         self.__text = ''
 
     
