@@ -99,8 +99,7 @@ class InteractiveCommand(SOCommand):
         SOCommand.__init__(self, cmd)
         
     def execute(self):        
-        # FIXME: cambiar a subprocess.call o similar teniendo en
-        # cuenta el problema de los metacaracteres (> < |)
+        # FIXME: change to subprocess.call or similar.
         return os.system(self.get_cmd())
     
 
@@ -126,57 +125,24 @@ def cmd_signalhandler(signum, frame):
 class BatchCommand(SOCommand):
     def __init__(self, cmd):
 	SOCommand.__init__(self, cmd)
-        self.w = None
-        self.cmd_alive = False
 
     def __real_execute(self):        
-        tmp_fd, tmp_name = tempfile.mkstemp('.tmp', 'cli-', '/tmp/')
-        num_lines = 0
-        
 	try:
 	    cmd_process = subprocess.Popen(self.get_cmd(),
                                            shell = True, 
-                                           stdout = open(tmp_name, "w"), 
+                                           stdout = subprocess.PIPE, 
+                                           stderr = subprocess.STDOUT,
                                            close_fds = True)
-            self.cmd_alive = True
-            
-            # While the process is alive, read its output and
-            # write to the stdout
-            f = open(tmp_name)
-            line = ''
-            while cmd_process.poll() == None:
-                b = f.read(1)
-                if b == '':
-                    time.sleep(0.001)
-                    continue
-                if b == '\n':
-                    print line
-                    line = ''
-                else:
-                    line = line + b
-
-            if len(line) != 0:
-                # Write all pending bytes (allready readed)
-                print line,
-
-            # The process finish so we can read all the output
-            # and wrote the rest of ouput to the stdout
-            b = f.read()
-            print b,
+            while True:
+                line = cmd_process.stdout.readline()
+                if not line:
+                    break
+                print line
 
         except IOError, (errno, strerror):
             pass
         except CmdInterrupted:
             pass
-        finally:
-
-            while cmd_process.poll() == None:
-                time.sleep(0.001)
-            try:
-                os.unlink(tmp_name)
-            except:
-                pass
-
         
     def execute(self):
         handler_sigterm = signal.getsignal(signal.SIGTERM)
@@ -197,18 +163,6 @@ class BatchCommand(SOCommand):
             signal.signal(signal.SIGTERM, handler_sigterm)
             signal.signal(signal.SIGINT, handler_sigint)
             signal.signal(signal.SIGTSTP, handler_sigtstp)
-
-
-def get_ch():
-    import sys, tty, termios
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-        return ch
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
 class FilterOut:
