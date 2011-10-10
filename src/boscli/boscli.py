@@ -882,9 +882,9 @@ def main():
      
     try:
         opts, args = getopt.getopt(sys.argv[1:], \
-                                   "vdnhf:a:c:", \
+                                   "vdnhf:a:c:i", \
                                    ["vervose","debug", "nopasswd", "help",
-                                    "file=", "name", "conf"])
+                                    "file=", "name", "conf", "interactive"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -896,6 +896,7 @@ def main():
     debug = False
     name = 'boscli-oss'
     confpath = None
+    interactive = True
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
@@ -912,6 +913,10 @@ def main():
             nopasswd_superuser = True
         elif opt in ("-f", "--file"):
             command_file = os.path.normpath(arg)
+        elif opt in ("-i", "--interactive"):
+            # ignore this option
+            # allways considerred interactive
+            pass
         else:
             initial_error ("%s, unhandled option" % opt)
 
