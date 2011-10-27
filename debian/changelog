@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.4-1) unstable; urgency=low
+
+  * Bugfixes
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Thu, 27 Oct 2011 18:31:10 +0200
+
 boscli-oss-core (0.2.3-1ubuntu1) lucid; urgency=low
 
   * Upgraded to lucid
