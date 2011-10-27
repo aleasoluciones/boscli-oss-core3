@@ -93,22 +93,6 @@ def bcli_help_types():
     for t in types:
         print "%s => %s" % (t, get_cli().get_type(t).help())
 
-        
-
-def get_function_name(function):
-    '''Return the real simbol name of a function from the function sintax in the bcli internal format'''
-    return 'bcli_' + ('_'.join(function))
-
-def get_function_help(function):
-    '''Return all the doc of a function.
-If the function have no doc, it returns "Not documented yet"
-'''
-    f = get_cli().get_function(function)
-    doc = f.__doc__
-    if doc == None:
-        doc = "Not documented yet\n"
-    return doc    
-
 def get_basic_help(cmd):
     str = ""
     for func in get_functions(cmd):

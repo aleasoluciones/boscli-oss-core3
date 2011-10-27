@@ -24,7 +24,7 @@ import privileges
 import string
 import ConfigParser
 import glob
-
+from helpers import *
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
 # Helper class to create static methods (class methods)
