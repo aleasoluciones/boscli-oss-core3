@@ -381,7 +381,8 @@ class BiferShell:
         The acepted characters are: letters, numbers and './-_:@'
         """
         allchars = string.maketrans('','')
-        if not str.translate(allchars, './-_:@').isalnum():
+        result = str.translate(allchars, './-_:@')
+        if result != '' and not result.isalnum():
             print "Error: Str '%s' contains invalid characters" % str
             raise ValueError("Str '%s' contains invalid characters" % str)
         return str
