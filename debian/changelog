@@ -1,3 +1,9 @@
+boscli-oss-core (0.2.6-1) unstable; urgency=low
+
+  * Bugfixes
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Wed, 02 Nov 2011 15:10:22 +0100
+
 boscli-oss-core (0.2.5-1) unstable; urgency=low
 
   * Bugfixes
