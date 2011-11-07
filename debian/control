@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Eduardo Ferro Aldama <eferro@alea-soluciones.com>
 Build-Depends: cdbs (>= 0.4.49),
                debhelper (>= 5.0),
-               python,
+               python-all,
                python-support (>= 0.6)
 Standards-Version: 3.8.1
 Homepage: http://oss.alea-soluciones.com/trac/wiki/BoscliOss/
