@@ -11,12 +11,11 @@
 '''
 
 
-import bostypes
-import boscliutils
+import boscli.boscliutils
 import re
 import string
 import os
-import privileges
+import boscli.privileges
 
 
 def __shell_helper(shellcmdstr, interactive, func_params_names, *args):
@@ -33,9 +32,9 @@ def __shell_helper(shellcmdstr, interactive, func_params_names, *args):
         # not all the vars were substituted so
         # raise error
         if interactive:
-            boscliutils.InteractiveCommand(s)
+            boscli.boscliutils.InteractiveCommand(s)
         else:
-            boscliutils.BatchCommand(s)
+            boscli.boscliutils.BatchCommand(s)
 
     except Exception,ex:
         print "__shell_helper. Error", ex
@@ -57,9 +56,7 @@ def ${func_name}(*args):
      __shell_helper(\"${shell}\", ${interactive}, ${func_params_names}, *args)
 
 
-get_cli().set_privilege(privileges.${priv},
-                        privileges.${mode},
-                        '${func_name}')
+boscli.get_cli().set_privilege(boscli.privileges.${priv},boscli.privileges.${mode}, '${func_name}')
 
 """
         self.__normalice_interactive()
@@ -204,7 +201,7 @@ class BoscliFileParser():
 
 
 # Read/Parse all the '.boscli' extensions
-for path in get_cli().get_extension_paths():
+for path in boscli.get_cli().get_extension_paths():
     for root, dirs, files in os.walk(path):
         for l in [os.path.join(root, f) for f in files if f.endswith('.boscli')]:
             BoscliFileParser(l).load()

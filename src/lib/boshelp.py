@@ -11,7 +11,7 @@
 '''
 
 
-import boscliutils
+import boscli.boscliutils
 
 
 def get_cmds():
@@ -120,11 +120,11 @@ def bcli_remotehelp_act():
      """    
      print "Starting remotehelp mode"
      print 
-     boscliutils.InteractiveCommand("screen -S bcli")
+     boscli.boscliutils.InteractiveCommand("screen -S bcli")
  
  
 def bcli_remotehelp_connect():
      """Connect to an active remote help session.
      Use remotehelp act in other terminal to activate remote session.
      """    
-     boscliutils.InteractiveCommand("screen -x bcli")
+     boscli.boscliutils.InteractiveCommand("screen -x bcli")

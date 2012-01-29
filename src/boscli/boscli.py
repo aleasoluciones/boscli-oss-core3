@@ -24,6 +24,8 @@ import privileges
 import string
 import ConfigParser
 import glob
+import imp
+import inspect
 from helpers import *
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
@@ -197,7 +199,10 @@ class BiferShell:
             boscliutils.Log.debug("'%s' ext dir loading" % ext)
             for entry in glob.glob(os.path.join(ext, "*.py")):
                 try:
+                    print "EFA1"
+                    print entry
                     self.import_cmds_file(entry)
+                    print "EFA2"
                     boscliutils.Log.debug("'%s' imported" % entry)
                 except IOError, ex:
                     boscliutils.Log.warning("Can access to '%s' extension file" % entry)
@@ -530,18 +535,19 @@ class BiferShell:
         
 
     def import_cmds_file(self, path):
-        # TODO: Refactor import_cmds 
-        act_symbols = globals().keys()
-        execfile(path, globals(), globals())
-        for s in globals().keys():
-            if s not in act_symbols and  str(s).startswith('bcli_'):
-                self.functions_files[s] = path
-                self.functions_sintax.append(s.split('_')[1:])
-                self.__cliFunctionsManager.append(s, globals()[s])
-        
+        print "IMPORT_CMDS_FILE ", path
+        module_name = os.path.splitext(os.path.basename(path))[0]
+        new_module = imp.load_source(module_name,path)
+        members = inspect.getmembers(new_module)
+        for (name, value) in members:
+            if inspect.isfunction(value) and name.startswith('bcli_'):
+                self.functions_files[name] = path
+                self.functions_sintax.append(name.split('_')[1:])
+                self.__cliFunctionsManager.append(name, value)                
 
     def import_cmds(self):
         # TODO: Refactor import_cmds_file
+        # FIXME: Remove??? 
         for s in globals():
             if s.startswith('bcli_'):
                 self.functions_files[s] = ''

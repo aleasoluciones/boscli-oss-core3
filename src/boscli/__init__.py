@@ -5,6 +5,7 @@
 
 
 import boscli
+from boscli import get_cli
 
 def main():
     boscli.main()
