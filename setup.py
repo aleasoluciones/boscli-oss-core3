@@ -6,7 +6,7 @@ import os.path
 
 setup(
     name='Boscli-oss',
-    version='0.2.6',
+    version='0.2.7',
     author='Eduardo Ferro Aldama',
     author_email='eferro@alea-soluciones.com',
     url='http://oss.alea-soluciones.com/trac/wiki/BoscliOss',
