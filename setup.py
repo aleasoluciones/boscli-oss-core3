@@ -4,12 +4,12 @@ from distutils.core import setup
 import glob
 import os.path
 
-setup( 
-    name='Boscli-oss', 
-    version='0.2.0', 
-    author='Eduardo Ferro Aldama', 
-    author_email='eferro@alea-soluciones.com', 
-    url='http://oss.alea-soluciones.com/trac/wiki/BoscliOss', 
+setup(
+    name='Boscli-oss',
+    version='0.2.6',
+    author='Eduardo Ferro Aldama',
+    author_email='eferro@alea-soluciones.com',
+    url='http://oss.alea-soluciones.com/trac/wiki/BoscliOss',
     description ='Extensible command line processor for "ad hoc" shells creation',
     license='GPL',
     platforms = 'Linux',
@@ -26,9 +26,9 @@ setup(
         'Topic :: Software Development :: Interpreters',
         ],
 
-    package_dir  = { '' : 'src' }, 
+    package_dir  = { '' : 'src' },
     packages = ['boscli', ],
     scripts = ['src/bin/boscli', ],
-    data_files = [ ( '/usr/lib/boscli/', 
+    data_files = [ ( '/usr/lib/boscli/',
                      glob.glob( 'src/lib/*.py')  ) ],
 )

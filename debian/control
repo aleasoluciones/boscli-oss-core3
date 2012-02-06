@@ -10,7 +10,7 @@ Standards-Version: 3.8.1
 Homepage: http://oss.alea-soluciones.com/trac/wiki/BoscliOss/
 
 Package: boscli-oss-core
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends}
