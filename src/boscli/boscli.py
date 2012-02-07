@@ -199,10 +199,7 @@ class BiferShell:
             boscliutils.Log.debug("'%s' ext dir loading" % ext)
             for entry in glob.glob(os.path.join(ext, "*.py")):
                 try:
-                    print "EFA1"
-                    print entry
                     self.import_cmds_file(entry)
-                    print "EFA2"
                     boscliutils.Log.debug("'%s' imported" % entry)
                 except IOError, ex:
                     boscliutils.Log.warning("Can access to '%s' extension file" % entry)
