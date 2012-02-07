@@ -376,20 +376,6 @@ class BiferShell:
     def pager(self):
         return self.__pager
 
-
-    def validate(self, str):
-        """Return str if only contains supported characters.
-        In other cases, print a error msg and raise ValueError.
-        The acepted characters are: letters, numbers and ',./-_:@'
-        """
-        allchars = string.maketrans('','')
-        result = str.translate(allchars, ',./-_:@')
-        if result != '' and not result.isalnum():
-            print "Error: Str '%s' contains invalid characters" % str
-            raise ValueError("Str '%s' contains invalid characters" % str)
-        return str
-
-
     def execute(self, function, line, filter):
         """Execute function with the concret info in line
         """
@@ -414,8 +400,7 @@ class BiferShell:
             sys.stdout = boscliutils.FilterOut(out, regexp, cmd, self.pager())
 
             try:
-                # Validate args and execute
-                args = [self.validate(w) for w in line.split()]
+                args = line.split()
                 self.__cliFunctionsManager.execute(function, args)
             except ValueError, ex:
                 print "Can't be processed. ", ex
