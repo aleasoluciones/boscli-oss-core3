@@ -11,52 +11,54 @@
 '''
 
 
+import boscli
+import boscli.helpers
 import boscli.boscliutils
 
 
 def get_cmds():
     '''Return the command suported in the system. We consider a command (or
     a command family) the first word of a function'''
-    functions = get_cli().get_functions()
+    functions = boscli.get_cli().get_functions()
     return sorted(list(set([a[0] for a in functions])))
 
 def get_active_cmds():
     '''Return the command enable in the actual mode'''
-    functions = get_cli().get_active_functions()
+    functions = boscli.get_cli().get_active_functions()
     return sorted(list(set([a[0] for a in functions])))
 
 def get_functions(cmd):
     '''Return all the enabled functions that correspond to the comand indicated'''
-    matchs = [a for a in get_cli().get_active_functions() if a[0] == cmd]
+    matchs = [a for a in boscli.get_cli().get_active_functions() if a[0] == cmd]
     return matchs
 
 
 def bcli_help():
     """Commands for interactive help.
-    """    
-    get_cli().basic_help()
+    """
+    boscli.get_cli().basic_help()
 
 
 def bcli_help_show_allcommands_full():
     """Show basic help for all availables commands (only for active mode).
     """
     cmd_list = []
-    for cmd in get_cli().get_active_functions():
+    for cmd in boscli.get_cli().get_active_functions():
         str = ''
-        str = str + get_cli().get_normalize_func_name(cmd)
-        str = str + " => " + get_function_help(cmd).split('\n')[0]
-        cmd_list.append(str)    
+        str = str + boscli.get_cli().get_normalize_func_name(cmd)
+        str = str + " => " + boscli.helpers.get_function_help(cmd).split('\n')[0]
+        cmd_list.append(str)
     cmd_list.sort()
     for cmd in cmd_list: print cmd
-    
-    
-    
+
+
+
 def bcli_help_show_allcommands():
     """Show a list of all available commands (only for active mode).
-    """    
+    """
     cmd_list = []
-    for cmd in get_cli().get_active_functions():
-        cmd_list.append(get_cli().get_normalize_func_name(cmd))
+    for cmd in boscli.get_cli().get_active_functions():
+        cmd_list.append(boscli.get_cli().get_normalize_func_name(cmd))
     cmd_list.sort()
     for cmd in cmd_list:
         print cmd
@@ -64,8 +66,8 @@ def bcli_help_show_allcommands():
 def bcli_help_basic():
     '''Show basic help. Same as '?<tab>' at command lines
     '''
-    get_cli().basic_help()
-    
+    boscli.get_cli().basic_help()
+
 def bcli_help_command_CMD(cmd):
     '''Show short help of the (active) functions corresponding to the command expecified.
     The short help only contain a line with a general description of the command.
@@ -88,23 +90,23 @@ def bcli_help_extended_command_CMD(cmd):
 def bcli_help_types():
     '''Show help for type/vars used in CLI commands.
     '''
-    types = get_cli().get_type_names()
+    types = boscli.get_cli().get_type_names()
     types.sort()
     for t in types:
-        print "%s => %s" % (t, get_cli().get_type(t).help())
+        print "%s => %s" % (t, boscli.get_cli().get_type(t).help())
 
 def get_basic_help(cmd):
     str = ""
     for func in get_functions(cmd):
-        str = str + get_cli().get_normalize_func_name(func)
-        str = str + " => " + get_function_help(func).split('\n')[0] + '\n'
+        str = str + boscli.get_cli().get_normalize_func_name(func)
+        str = str + " => " + boscli.helpers.get_function_help(func).split('\n')[0] + '\n'
     return str
 
 def get_extended_help(cmd):
     str = ""
     for func in get_functions(cmd):
-        str = str + get_cli().get_normalize_func_name(func)
-        str = str + " => " + get_function_help(func) + '\n'
+        str = str + boscli.get_cli().get_normalize_func_name(func)
+        str = str + " => " + boscli.helpers.get_function_help(func) + '\n'
     return str
 
 
@@ -116,15 +118,15 @@ def bcli_remotehelp_connect():
 
 
 def bcli_remotehelp_act():
-     """Activate remote help mode. 
-     """    
+     """Activate remote help mode.
+     """
      print "Starting remotehelp mode"
-     print 
+     print
      boscli.boscliutils.InteractiveCommand("screen -S bcli")
- 
- 
+
+
 def bcli_remotehelp_connect():
      """Connect to an active remote help session.
      Use remotehelp act in other terminal to activate remote session.
-     """    
+     """
      boscli.boscliutils.InteractiveCommand("screen -x bcli")
