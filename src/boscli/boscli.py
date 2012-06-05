@@ -334,34 +334,30 @@ class BiferShell:
             filter = self.expand_abbrevs_filter(filter)
         else:
             cmd = line
-
-        # First expand all the aliases
         cmd = self.expand_alias(cmd)
-        # Second expand abbrevs
         cmd = self.expand_abbrevs(cmd)
 
+        function_matches = self.__select_functions_that_matches(cmd)               
+        same_len_functions = [function for function in function_matches if len(function) == len(cmd.split())]
+        if len(same_len_functions) == 1:
+            self.execute(same_len_functions[0], cmd, filter)
+            return True
+        exact_match = [function for function in same_len_functions if function == cmd.split()]
+        if exact_match:
+            self.execute(exact_match[0], cmd, filter)
+            return True
+        else:
+            return function_matches
+
+    def __select_functions_that_matches(self, cmd):
         words = cmd.split()
         match_list = []
-
-        similar_match_list = []
-
-        # Validate
-        for function in self.get_active_functions():
-            if self.match(function, words) == True and \
-                len(words) == len(function):
+        for function in self.get_active_functions():                       
+            if self.match(function, words) == True:
                 match_list.append(function)
-            if self.match(function, words) == True and \
-                len(words) != len(function):
-                similar_match_list.append(function)
-        if len(match_list) == 1:
-            # Then Execute
-            self.execute(match_list[0], cmd, filter)
-            return True
-        if len(match_list) > 1:
-            return match_list
-        else:
-            return similar_match_list
-
+                
+        match_list = sorted(match_list, key=len)
+        return match_list            
 
     # FIXME: Change implementation for not use global info for filters
     def get_filter(self):

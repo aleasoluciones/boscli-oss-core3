@@ -1,3 +1,10 @@
+boscli-oss-core (0.2.8-1) unstable; urgency=low
+
+  * Prefer exact matches when trying to find a function for
+    a boscli comand / line
+
+ -- Eduardo Ferro <eferro@alea-soluciones.com>  Tue, 05 Jun 2012 15:24:26 +0200
+
 boscli-oss-core (0.2.7-1) unstable; urgency=low
 
   * Import plugins using imp module
