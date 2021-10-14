@@ -19,13 +19,6 @@ import tempfile
 import threading,time
 
 
-# Workaround to create static methods
-# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
-class Callable:
-    def __init__(self, anycallable):
-        self.__call__ = anycallable
-
-
 class Log:
     Name = ''
     Verbose = False
@@ -36,35 +29,32 @@ class Log:
         Log.Verbose = verbose
         Log.Debug = debug
         syslog.openlog(name)
-        
+
+    @staticmethod
     def debug(msg):
         if Log.Debug:
             syslog.syslog(syslog.LOG_DEBUG, msg)
 
+    @staticmethod
     def log(msg):
         syslog.syslog(syslog.LOG_INFO, msg)
 
+    @staticmethod
     def info(msg):
         if Log.Verbose or Log.Debug:
             syslog.syslog(syslog.LOG_INFO, msg)
-        
+
+    @staticmethod
     def warning(msg):
-        print msg
+        print(msg)
         syslog.syslog(syslog.LOG_WARNING, msg)
 
+    @staticmethod
     def error(msg, exception):
         import traceback
         syslog.syslog(syslog.LOG_ERR, msg)
         syslog.syslog(syslog.LOG_ERR, ''.join(traceback.format_list(traceback.extract_stack())))
         traceback.print_exc()
-
-
-    init = Callable(init)
-    debug = Callable(debug)
-    info = Callable(info)
-    log = Callable(log)
-    warning = Callable(warning)
-    error = Callable(error)
 
 
 class SOCommand:
@@ -77,18 +67,18 @@ class SOCommand:
 
     def get_cmd(self):
         return self.__cmd
-    
+
     def run(self):
         self.log_start()
         self.__result = self.execute()
         self.log_end()
-    
+
     def result(self):
         return self.__result
-    
+
     def execute(self):
         raise "Should be reimplemented by the descendants"
-        
+
     def log_start(self):
         Log.debug("Executing: '%s'" % self.__cmd)
     def log_end(self):
@@ -97,11 +87,11 @@ class SOCommand:
 class InteractiveCommand(SOCommand):
     def __init__(self, cmd):
         SOCommand.__init__(self, cmd)
-        
-    def execute(self):        
+
+    def execute(self):
         # FIXME: change to subprocess.call or similar.
         return os.system(self.get_cmd())
-    
+
 
 
 def validate_filter(filter_str):
@@ -110,11 +100,11 @@ def validate_filter(filter_str):
         filter = filter_str.strip().split()
     if filter != None:
         if len(filter) != 2 or not filter[0] in ['include', 'begin', 'exclude']:
-            print "Error in filter expresion '%s'." % filter_str
-            print "Use '(include | begin | exclude) regexp'"
+            print("Error in filter expresion '%s'." % filter_str)
+            print("Use '(include | begin | exclude) regexp'")
             return False
     return True
-    
+
 
 class CmdInterrupted(Exception): pass
 
@@ -124,26 +114,26 @@ def cmd_signalhandler(signum, frame):
 
 class BatchCommand(SOCommand):
     def __init__(self, cmd):
-	SOCommand.__init__(self, cmd)
+        SOCommand.__init__(self, cmd)
 
-    def __real_execute(self):        
-	try:
-	    cmd_process = subprocess.Popen(self.get_cmd(),
-                                           shell = True, 
-                                           stdout = subprocess.PIPE, 
+    def __real_execute(self):
+        try:
+            cmd_process = subprocess.Popen(self.get_cmd(),
+                                           shell = True,
+                                           stdout = subprocess.PIPE,
                                            stderr = subprocess.STDOUT,
                                            close_fds = True)
             while True:
                 line = cmd_process.stdout.readline()
                 if not line:
                     break
-                print line
+                print(line)
 
-        except IOError, (errno, strerror):
+        except (IOError, (errno, strerror)):
             pass
         except CmdInterrupted:
             pass
-        
+
     def execute(self):
         handler_sigterm = signal.getsignal(signal.SIGTERM)
         handler_sigint = signal.getsignal(signal.SIGINT)
@@ -154,8 +144,8 @@ class BatchCommand(SOCommand):
             signal.signal(signal.SIGTSTP, cmd_signalhandler)
 
             self.__real_execute()
-            
-        except IOError, (errno, strerror):
+
+        except (IOError, (errno, strerror)):
             pass
         except CmdInterrupted:
             pass
@@ -180,21 +170,21 @@ class FilterOut:
     def __init__(self, out, regex, command, pager):
         """Filter|Pager class.
         command: 'include'|'exclude'|'begin'|None
-        pager: True | False 
+        pager: True | False
         """
         # The filter must be already validated
         self.__out = out
         self.__regex = regex
         self.__command = command
         self.__pager = pager
-	self.__line = 1
+        self.__line = 1
         self.__text = ''
 
         try:
             import curses
             curses.setupterm()
             self.__num_lines = curses.tigetnum('lines')
-	except KeyError:
+        except KeyError:
             self.__num_lines = 24
         except:
             # If we have a problem to init the terminal
@@ -203,12 +193,12 @@ class FilterOut:
             self.__pager = False
 
     def num_term_lines(self):
-	return self.__num_lines
+        return self.__num_lines
 
 
     def wait_term_character(self):
 	# From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/134892
-	import sys, tty, termios
+        import sys, tty, termios
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -238,7 +228,7 @@ class FilterOut:
             self.__out.flush()
             self.wait_term_character()
             self.__line = 1
-    
+
         # Write the real line
         self.__out.write(line + '\n')
         self.__out.flush()
@@ -251,7 +241,7 @@ class FilterOut:
         elif self.__command == 'begin' and line.startswith(self.__regex): text_ok = True
         elif self.__command == None: text_ok = True
         return text_ok
-    
+
     def write(self, text):
         self.__text = self.__text + text
         if self.__text[-1:] != '\n':
@@ -262,10 +252,10 @@ class FilterOut:
                 self.output_line(l)
         self.__text = ''
 
-    
+
 def main():
     pass
 
-    
+
 if __name__ == '__main__':
     main()

@@ -4,8 +4,9 @@
 # Licensed under GPL v3 or later, see COPYING for the whole text
 
 
-import boscli
-from boscli import get_cli
+from . import boscli
+
+from .boscli import get_cli
 
 def main():
     boscli.main()

@@ -49,7 +49,7 @@ def bcli_help_show_allcommands_full():
         str = str + " => " + boscli.helpers.get_function_help(cmd).split('\n')[0]
         cmd_list.append(str)
     cmd_list.sort()
-    for cmd in cmd_list: print cmd
+    for cmd in cmd_list: print(cmd)
 
 
 
@@ -61,7 +61,7 @@ def bcli_help_show_allcommands():
         cmd_list.append(boscli.get_cli().get_normalize_func_name(cmd))
     cmd_list.sort()
     for cmd in cmd_list:
-        print cmd
+        print(cmd)
 
 def bcli_help_basic():
     '''Show basic help. Same as '?<tab>' at command lines
@@ -73,18 +73,18 @@ def bcli_help_command_CMD(cmd):
     The short help only contain a line with a general description of the command.
     '''
     if cmd not in get_active_cmds():
-        print "There is no command named %s" % cmd
+        print("There is no command named %s" % cmd)
     else:
-        print get_basic_help(cmd).strip()
+        print(get_basic_help(cmd).strip())
 
 def bcli_help_extended_command_CMD(cmd):
     '''Show extendeed help of the (active) functions corresponding to the command expecified.
     The extended help have all the info available at the BCli User Manual.
     '''
     if cmd not in get_active_cmds():
-        print "There is no command named %s" % cmd
+        print("There is no command named %s" % cmd)
     else:
-        print get_extended_help(cmd).strip()
+        print(get_extended_help(cmd).strip())
 
 
 def bcli_help_types():
@@ -93,7 +93,7 @@ def bcli_help_types():
     types = boscli.get_cli().get_type_names()
     types.sort()
     for t in types:
-        print "%s => %s" % (t, boscli.get_cli().get_type(t).help())
+        print("%s => %s" % (t, boscli.get_cli().get_type(t).help()))
 
 def get_basic_help(cmd):
     str = ""
@@ -120,7 +120,7 @@ def bcli_remotehelp_connect():
 def bcli_remotehelp_act():
      """Activate remote help mode.
      """
-     print "Starting remotehelp mode"
+     print("Starting remotehelp mode")
      print
      boscli.boscliutils.InteractiveCommand("screen -S bcli")
 

@@ -18,21 +18,15 @@ import os.path
 import sys, getpass
 import getopt
 import atexit
-import bostypes
-import boscliutils
-import privileges
+from . import bostypes
+from . import boscliutils
+from . import privileges
 import string
-import ConfigParser
+import configparser
 import glob
 import imp
 import inspect
-from helpers import *
-
-# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
-# Helper class to create static methods (class methods)
-class Callable:
-    def __init__(self, anycallable):
-        self.__call__ = anycallable
+from .helpers import *
 
 
 # Wraper to access to the unique instance of BiferShell
@@ -45,9 +39,10 @@ def get_cli():
 class BiferShell:
 
     instance = None
+
+    @staticmethod
     def get_instance():
         return BiferShell.instance
-    get_instance = Callable(get_instance)
 
     def __init__(self,
                  name,
@@ -67,7 +62,7 @@ class BiferShell:
         refusedfunctions = []
         if self.__confpath != None:
             boscliutils.Log.info("Parsing '%s' conf file" % self.__confpath)
-            config = ConfigParser.ConfigParser()
+            config = configparser.configparser()
             res = config.read(os.path.expanduser(self.__confpath))
             if len(res) == 0:
                 boscliutils.Log.warning("Error parsing '%s' conf file" % self.__confpath)
@@ -201,9 +196,9 @@ class BiferShell:
                 try:
                     self.import_cmds_file(entry)
                     boscliutils.Log.debug("'%s' imported" % entry)
-                except IOError, ex:
+                except IOError as ex:
                     boscliutils.Log.warning("Can access to '%s' extension file" % entry)
-                except Exception, ex:
+                except Exception as ex:
                     module_str = "Module '%s' import error" % os.path.basename(entry.strip())[:-3]
                     boscliutils.Log.error(module_str, ex)
 
@@ -310,7 +305,7 @@ class BiferShell:
             stop = None
             while not stop:
                 try:
-                    line = raw_input(self.prompt)
+                    line = input(self.prompt)
                 except EOFError:
                     line = 'EOF'
 
@@ -337,7 +332,7 @@ class BiferShell:
         cmd = self.expand_alias(cmd)
         cmd = self.expand_abbrevs(cmd)
 
-        function_matches = self.__select_functions_that_matches(cmd)               
+        function_matches = self.__select_functions_that_matches(cmd)
         same_len_functions = [function for function in function_matches if len(function) == len(cmd.split())]
         if len(same_len_functions) == 1:
             self.execute(same_len_functions[0], cmd, filter)
@@ -352,12 +347,12 @@ class BiferShell:
     def __select_functions_that_matches(self, cmd):
         words = cmd.split()
         match_list = []
-        for function in self.get_active_functions():                       
+        for function in self.get_active_functions():
             if self.match(function, words) == True:
                 match_list.append(function)
-                
+
         match_list = sorted(match_list, key=len)
-        return match_list            
+        return match_list
 
     # FIXME: Change implementation for not use global info for filters
     def get_filter(self):
@@ -398,10 +393,10 @@ class BiferShell:
             try:
                 args = line.split()
                 self.__cliFunctionsManager.execute(function, args)
-            except ValueError, ex:
-                print "Can't be processed. ", ex
-            except Exception, ex:
-                print "CLI Cmd execution failed: '%s'" % line
+            except ValueError as ex:
+                print("Can't be processed. ", ex)
+            except Exception as ex:
+                print("CLI Cmd execution failed: '%s'" % line)
                 boscliutils.Log.debug("CLI Cmd execution failed: '%s'" % line)
                 if self.__debug:
                     import traceback
@@ -413,10 +408,10 @@ class BiferShell:
             sys.stdout = out
 
             boscliutils.Log.debug("CLI Cmd end: '%s'" % line.strip())
-        except IndexError,e:
+        except IndexError as e:
             boscliutils.Log.error("Error executing CLI Cmd: '%s'" % line.strip())
             boscliutils.Log.error("Exception: %s" % e)
-            print e
+            print(e)
         finally:
             self.in_command_execution = False
 
@@ -453,15 +448,15 @@ class BiferShell:
                     if len(ret) > 0:
                         self.default(line)
                         print
-                        print "May be you are looking for: "
+                        print("May be you are looking for: ")
                         self.interactive_help(line.split(), '')
                         return None
                 # Si no la hemos podido ejecutar decimos que sintaxis desconocida
-            except KeyError, ex:
-                print line
-                print dir()
-                print globals()
-                print "..."
+            except KeyError as ex:
+                print(line)
+                print(dir())
+                print(globals())
+                print("...")
             self.default(line)
         return None
 
@@ -471,7 +466,7 @@ class BiferShell:
 
     def default(self, line):
         if line != None:
-            print "Syntax Error. Unknow command '%s'" % (line)
+            print("Syntax Error. Unknow command '%s'" % (line))
             boscliutils.Log.debug( "Syntax Error. Unknow command '%s'" % (line))
 
         return False
@@ -483,14 +478,14 @@ class BiferShell:
 
     def exec_cmds_file(self, command_file):
         """Execute the command in the file, except exit/EOF command"""
-        print "executing %s" % command_file
+        print("executing %s" % command_file)
         if os.path.isfile(command_file):
             for line in open(command_file).readlines():
                 line = line[:-1]
                 if len(line):
                     stop = self.onecmd(line)
                     stop = self.postcmd(stop, line)
-            print "finish executing %s" % command_file
+            print("finish executing %s" % command_file)
             print
         else:
             raise RuntimeError('%s is not a valid file' % command_file)
@@ -550,7 +545,7 @@ class BiferShell:
 
         if self.__interactive:
             print
-            print "bye"
+            print("bye")
 
         sys.exit(0)
 
@@ -602,10 +597,10 @@ class BiferShell:
                     if help != None:
                         help_lines.append(self.get_basic_help_str(f))
         if len(help_lines) == 0:
-            print "No help available"
+            print("No help available")
         else:
             for line in sorted(help_lines):
-                print line
+                print(line)
 
 
     def show_help(self, line):
@@ -645,7 +640,7 @@ class BiferShell:
                     word_at_point = word_to_complete
                 else:
                     word_at_point = word_to_complete + line[readline.get_endidx():].split()[0]
-            except Exception, ex:
+            except Exception as ex:
                 word_at_point = None
 
             if len(line) > readline.get_endidx():
@@ -709,7 +704,7 @@ class BiferShell:
 
     def redisplay(self):
         line = readline.get_line_buffer()
-        print self.prompt_str() + line.strip(),
+        print(self.prompt_str() + line.strip())
 
 
 
@@ -745,7 +740,7 @@ class BiferShell:
                             match_list.append('<' + next_word + '>')
                     else:
                         match_list.append(next_word)
-                except IndexError,ex:
+                except IndexError as ex:
                     pass
         return match_list
 
@@ -789,7 +784,7 @@ class BiferShell:
         result = None
         prompt = prompt + " (Y/[N]): "
         while True:
-            print prompt
+            print(prompt)
             result = boscliutils.get_ch()
             if result.upper() in ['Y', 'N']:
                 return  result.upper() == 'Y'
@@ -828,13 +823,13 @@ mandatory for the correspondent short option)
 More info at Boscli hompage
 http://oss.alea-soluciones.com/trac/wiki/BoscliOss
 """
-    print usage_msg
+    print(usage_msg)
 
 
 def initial_error(err_msg):
-    print "Error."
-    print err_msg
-    print "Use: boscli -h to see the how to use the command"
+    print("Error.")
+    print(err_msg)
+    print("Use: boscli -h to see the how to use the command")
     sys.exit()
 
 
@@ -869,9 +864,9 @@ def main():
                                    "vdnhf:a:c:i", \
                                    ["vervose","debug", "nopasswd", "help",
                                     "file=", "name", "conf", "interactive"])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     command_file = None

@@ -8,16 +8,10 @@
   $URL:$
   Alea-Soluciones (Bifer) (c) 2007
   Created: eferro - 29/7/2007
-'''    
+'''
 
 
-import boscliutils
-
-# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52304
-# Helper class to create static methods (class methods)
-class Callable:
-    def __init__(self, anycallable):
-        self.__call__ = anycallable
+from . import boscliutils
 
 
 class Ip:
@@ -25,13 +19,13 @@ class Ip:
         self._ip = str_ip
         self._prefix = prefix
         self._netbits = 32-prefix
-        
+
         self._netmaskbits = ((1<<(self._netbits))-1) ^ 0xFFFFFFFF
         self._netmask =  self.__int_to_ip(self._netmaskbits)
         self._network = self.__int_to_ip((self.__ip_to_int(self._ip) & self._netmaskbits))
         self._broadcast = self.__int_to_ip((self.__ip_to_int(self._ip) | (self._netmaskbits ^ 0xFFFFFFFF)))
-    
-    
+
+    @staticmethod
     def to_int(ip):
         r = 0
         try:
@@ -43,7 +37,8 @@ class Ip:
         except:
             raise ValueError
         return r
-    
+
+    @staticmethod
     def to_str(int_ip):
         r = []
         r.append(str((int_ip & 0xFF000000) >> 24))
@@ -52,6 +47,7 @@ class Ip:
         r.append(str((int_ip & 0x000000FF) >>  0))
         return ".".join(r)
 
+    @staticmethod
     def validate_netmask(str_netmask):
         """Return True if the netmask is valid
         """
@@ -66,24 +62,20 @@ class Ip:
                 return False
             if not bit_activated and bit == 1:
                 bit_activated = True
-            
+
             # shift one position
             data = data >> 1
         return True
-        
+
+    @staticmethod
     def num_ips(start, end):
-        return Ip.to_int(end) - Ip.to_int(start) 
-          
-    def ips(start, end): 
-        return map(Ip.to_str, range(Ip.to_int(start), Ip.to_int(end) + 1)) 
-        
-    to_str = Callable(to_str)
-    to_int = Callable(to_int)
-    num_ips = Callable(num_ips)
-    ips = Callable(ips)
-    validate_netmask = Callable(validate_netmask)
-    
-            
+        return Ip.to_int(end) - Ip.to_int(start)
+
+    @staticmethod
+    def ips(start, end):
+        return map(Ip.to_str, range(Ip.to_int(start), Ip.to_int(end) + 1))
+
+
     def ip(self):
         return self._ip
     def prefix(self):
@@ -94,13 +86,13 @@ class Ip:
         return self._network
     def broadcast(self):
         return self._broadcast
-    def ip_min(self): 
+    def ip_min(self):
         return self.__int_to_ip(self.__ip_to_int(self._network) + 1)
     def ip_max(self):
         return self.__int_to_ip(self.__ip_to_int(self._broadcast) - 1)
     def num_ips(self):
-        return self.__ip_to_int(self._broadcast) - self.__ip_to_int(self._network) - 1 
-        
+        return self.__ip_to_int(self._broadcast) - self.__ip_to_int(self._network) - 1
+
 
     def __ip_to_int(self, ip):
         r = 0
@@ -113,7 +105,7 @@ class Ip:
         except:
             raise ValueError
         return r
-    
+
     def __int_to_ip(self, int_ip):
         r = []
         r.append(str((int_ip & 0xFF000000) >> 24))
@@ -121,5 +113,5 @@ class Ip:
         r.append(str((int_ip & 0x0000FF00) >>  8))
         r.append(str((int_ip & 0x000000FF) >>  0))
         return ".".join(r)
-    
+
 

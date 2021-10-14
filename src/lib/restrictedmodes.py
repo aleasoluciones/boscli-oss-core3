@@ -26,9 +26,9 @@ import socket
 def get_user_name():
     """Return the real user name based on the environ var"""
     # FIXME needs better implementation
-    if os.environ.has_key("USERNAME"):
+    if "USERNAME" in os.environ:
         return os.environ["USERNAME"]
-    elif os.environ.has_key("SUDO_USER"):
+    elif "SUDO_USER" in os.environ:
         return os.environ["SUDO_USER"]
     else:
         return None
@@ -43,7 +43,7 @@ boscli.get_cli().set_privilege(boscli.privileges.MANUF, boscli.privileges.NORMAL
 def bcli_passwd():
     """Change login password.
     """
-    print "Changing system login password"
+    print("Changing system login password")
     boscli.boscliutils.InteractiveCommand("passwd %s" % get_user_name())
 
 def bcli_passwd_configuremode():
@@ -62,7 +62,7 @@ def bcli_passwd_priv_manufacturer():
     boscli.get_cli().change_priv_passwd(boscli.privileges.MANUF)
 
 
-    
+
 def validate_change_mode(mode):
     """If the is not a password defined return false,
     in other cases, prompt the user for password and return if
@@ -71,7 +71,7 @@ def validate_change_mode(mode):
     #FIXME
     try:
         global passwords
-        
+
         try:
             password = passwords[mode]
         except KeyError:
@@ -147,7 +147,7 @@ def bcli_exit():
     if boscli.boscli.get_cli().get_mode() == boscli.privileges.NORMAL:
         boscli.get_cli().quit()
     else:
-        print "Exit from actual mode..."
+        print("Exit from actual mode...")
         boscli.get_cli().change_mode(boscli.privileges.NORMAL)
 #---------------------------------------------------------------------------------
 
@@ -163,19 +163,19 @@ def bcli_privilege_initial_enable():
     """Set enable level as initial privilege level for actual user
     """
     boscli.get_cli().change_initial_privilege(boscli.privileges.ENABLE)
-    print "Inital user privileges change to: 1 [enable level]"
+    print("Inital user privileges change to: 1 [enable level]")
 
 def bcli_privilege_initial_manufacturer():
     """Set manufacturer level as initial privilege level for actual user
     """
     boscli.get_cli().change_initial_privilege(boscli.privileges.MANUF)
-    print "Inital user privileges change to: 2 [manufacturer level]"
+    print("Inital user privileges change to: 2 [manufacturer level]")
 
 def bcli_privilege_initial_normal():
     """Set normal level as initial privilege level for actual user
     """
     boscli.get_cli().change_initial_privilege(boscli.privileges.NONE)
-    print "Inital user privileges change to: 0 [normal level]"
+    print("Inital user privileges change to: 0 [normal level]")
 #---------------------------------------------------------------------------------
 
-    
+

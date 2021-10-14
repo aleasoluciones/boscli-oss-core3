@@ -26,9 +26,9 @@ def __shell_helper(shellcmdstr, interactive, func_params_names, *args):
 
         s = string.Template(shellcmdstr)
         s = s.substitute(d)
-        
 
-        # TODO if s contains ${<var>}, 
+
+        # TODO if s contains ${<var>},
         # not all the vars were substituted so
         # raise error
         if interactive:
@@ -36,11 +36,11 @@ def __shell_helper(shellcmdstr, interactive, func_params_names, *args):
         else:
             boscli.boscliutils.BatchCommand(s)
 
-    except Exception,ex:
-        print "__shell_helper. Error", ex
-        print "__shell_helper. Tpe", type(ex)
+    except Exception as ex:
+        print("__shell_helper. Error", ex)
+        print("__shell_helper. Tpe", type(ex))
 
-    
+
 
 
 class CommandDefiner():
@@ -68,9 +68,9 @@ boscli.get_cli().set_privilege(boscli.privileges.${priv},boscli.privileges.${mod
             code = s.substitute(self.__def_dict)
 
             exec(code, globals(), globals())
-        except Exception,ex:
-            print "ERROR", ex
-            print type(ex)
+        except Exception as ex:
+            print("ERROR", ex)
+            print(type(ex))
 
 
     def __normalice_interactive(self):
@@ -79,19 +79,19 @@ boscli.get_cli().set_privilege(boscli.privileges.${priv},boscli.privileges.${mod
             interactive_value = self.__def_dict['interactive'].lower()
         except KeyError:
             interactive_value = 'no'
-        
-        if interactive_value == 'no': 
+
+        if interactive_value == 'no':
             self.__def_dict['interactive'] = 'False'
-        elif interactive_value == 'yes': 
-            self.__def_dict['interactive'] = 'True'        
+        elif interactive_value == 'yes':
+            self.__def_dict['interactive'] = 'True'
         else:
             raise ValueError("Value '%s' is not valid. Use yes/no" % interactive_value)
 
 
 
-    def __process_cmdstr(self):        
+    def __process_cmdstr(self):
         self.__func_params = []
-        self.__func_params_names = []        
+        self.__func_params_names = []
         func_name = "bcli"
         pos = 0
         for w in self.__def_dict['cmd'].split():
@@ -118,8 +118,8 @@ class BoscliFileParser():
         self.__filename = filename
         self.__need_attribs = ['cmd', 'shell']
         self.__legal_attribs = ['cmd', 'shell', 'doc', 'priv', 'mode']
-        self.__def_map = {}        
-        
+        self.__def_map = {}
+
     def __add_cmd_attrib(self, var, value):
         # check already defined var or not legar varname
         if self.__def_map.has_key(var) or var not in self.__legal_attribs:
@@ -140,9 +140,9 @@ class BoscliFileParser():
 
         if not self.__def_map.has_key('doc'):
             self.__def_map['doc'] = "Not documented yet\n"
-        if not self.__def_map.has_key('priv'): 
+        if not self.__def_map.has_key('priv'):
             self.__def_map['priv'] = 'NONE'
-        if not self.__def_map.has_key('mode'): 
+        if not self.__def_map.has_key('mode'):
             self.__def_map['mode'] = 'NORMAL'
         if not self.__def_map.has_key('interactive'):
             self.__def_map['interactive'] = 'no'
@@ -151,7 +151,7 @@ class BoscliFileParser():
         CommandDefiner(self.__def_map)
 
         # TODO process other attribs
-        
+
         # init temporal definition data
         self.__def_map = {}
 
@@ -177,8 +177,8 @@ class BoscliFileParser():
                 if re.match(r'\s*\[\s*\w+\s*\]\s*', l):
                     if def_found:
                         self.__define_command()
-                    else:                       
-                        def_found = True                        
+                    else:
+                        def_found = True
                 else:
                     m = re.search(r'\s*(?P<var>\b\w+\b)\s*=(?P<value>.+)\s*', l)
                     if m:
@@ -186,16 +186,16 @@ class BoscliFileParser():
                         value = m.group('value').strip()
                         self.__add_cmd_attrib(var, value)
                     else:
-                        print "Invalid boscli file line: '%s'" % (l)
+                        print("Invalid boscli file line: '%s'" % (l))
                         raise ValueError("Not valid boscli file line '%s'" % (l))
 
             # Process the last command definition
             if not self.__empty_definition():
                 self.__define_command()
 
-        except IOError, ex:
+        except IOError as ex:
             msg = "Can't read %s boscli file" % self.__filename
-            print msg
+            print(msg)
             raise IOError("Can't read %s boscli file" % self.__filename)
 
 

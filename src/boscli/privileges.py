@@ -11,7 +11,7 @@
 
 '''
 
-import boscliutils
+from . import boscliutils
 import pickle
 import os.path
 import os
@@ -59,19 +59,19 @@ class CliFunctionsManager:
         try:
             file = open(self.__get_passfile_name(), "rb")
             self.__passwords = pickle.load(file)
-        except IOError, ex:
+        except IOError:
             # If we can't read the file ignore it....
             pass
         self.__functions_access = {}
         self.__functions = {}
-        
+
 
     def init_privileges(self):
         # try to read password file (if exists)
         try:
             file = open(self.__get_privilegesfile_name(), "rb")
             self.__priv = pickle.load(file)
-        except IOError, ex:
+        except IOError:
             # If we can't read the file ignore it....
             pass
 
@@ -119,7 +119,7 @@ class CliFunctionsManager:
         return False
 
     def valid_function(self, function_name):
-        
+
         # At this moment, we only validate if the function
         # is configured to be refused ([refusedfunctions] section
         # at conf file
@@ -137,7 +137,7 @@ class CliFunctionsManager:
         return True
 
 
-    def append(self, function_name, func):        
+    def append(self, function_name, func):
         # Remove initial word, from functionname (bcli, dynbcli, etc)
         function_name = '_'.join(function_name.split('_')[1:])
 
@@ -146,10 +146,10 @@ class CliFunctionsManager:
             return
 
         self.__functions[function_name] = func
-        if not self.__functions_access.has_key(function_name):
+        if function_name not in self.__functions_access:
             self.__functions_access[function_name] = [NONE, NORMAL]
-    
-    def remove(self, function_name):        
+
+    def remove(self, function_name):
         # Remove initial word, from functionname (bcli, dynbcli, etc)
         function_name = '_'.join(function_name.split('_')[1:])
         del self.__functions[function_name]
@@ -159,11 +159,11 @@ class CliFunctionsManager:
         # Remove initial word, from functionname (bcli, dynbcli, etc)
         function = '_'.join(function.split('_')[1:])
         self.__functions_access[function] = [min_priv, mode]
-        
+
     def set_privileges(self, priv):
         self.__priv = priv
         return True
-    
+
     def get_privileges(self): return self.__priv
     def set_mode(self, mode):
         self.__mode = mode
@@ -187,7 +187,7 @@ class CliFunctionsManager:
 
     #------------------------------------------------
     def push_context(self, context):
-        self.__context.append(context)        
+        self.__context.append(context)
 
     def pop_context(self):
         try:
@@ -198,15 +198,15 @@ class CliFunctionsManager:
 
     def context(self):
         return " ".join(self.__context)
-    #------------------------------------------------        
+    #------------------------------------------------
 
 
     def context_info(self):
         context = self.context()
         if context == "":
             context = self.__mode
-            
-        return "%d [%s] (%s)%s" % (self.__priv, 
+
+        return "%d [%s] (%s)%s" % (self.__priv,
                                  self.__priv_names[self.__priv],
                                  context,
                                  self.__prompts[self.__priv])
@@ -217,23 +217,23 @@ class CliFunctionsManager:
 
     def change_mode(self, mode):
         self.__change_mode(mode)
-        
+
 
     def change_priv_passwd(self, priv):
         try:
             self.__passwords[priv] = self.__get_new_password()
             self.__dump_passwords();
-            print 'Password set'
-        except InvalidPassword, e:
-            print "Error: ", e
+            print('Password set')
+        except InvalidPassword as e:
+            print("Error: ", e)
 
     def change_mode_passwd(self, mode):
         try:
             self.__passwords[mode] = self.__get_new_password()
             self.__dump_passwords();
-            print 'Password set'
-        except InvalidPassword, e:
-            print "Error: ", e
+            print('Password set')
+        except InvalidPassword as e:
+            print("Error: ", e)
 
     def __change_mode(self, dest_mode):
         # FIXME refactor __change_priv and __change_mode
@@ -242,31 +242,31 @@ class CliFunctionsManager:
                 self.set_mode(dest_mode)
                 return
             if self.__get_actual_password(dest_mode) == None:
-                print 'No password defined for mode %s' % dest_mode
+                print('No password defined for mode %s' % dest_mode)
                 try:
                     self.__passwords[dest_mode] = self.__get_new_password()
                     self.__dump_passwords();
-                    print 'Password set'
-                    print "Changed to %s..." % dest_mode
+                    print('Password set')
+                    print("Changed to %s..." % dest_mode)
                     self.set_mode(dest_mode)
                     return
-                except InvalidPassword, e:
-                    print "Error: ", e
+                except InvalidPassword as e:
+                    print("Error: ", e)
                     return
             else:
                 if self.__passwords[dest_mode] == '':
-                    print "Changed to %s..." % dest_mode
+                    print("Changed to %s..." % dest_mode)
                     self.set_mode(dest_mode)
                 else:
                     passwd = self.__get_password()
                     if passwd ==  self.__passwords[dest_mode] or passwd in self.__get_temp_passwords():
-                        print "Changed to %s..." % dest_mode
+                        print("Changed to %s..." % dest_mode)
                         self.set_mode(dest_mode)
                     else:
-                        print "Invalid password"
+                        print("Invalid password")
         except:
-            print "Invalid password"
-        
+            print("Invalid password")
+
     def __change_priv(self, dest_priv):
         # FIXME refactor __change_priv and __change_mode
         try:
@@ -274,36 +274,36 @@ class CliFunctionsManager:
                 self.set_privileges(dest_priv)
                 return
             if self.__get_actual_password(dest_priv) == None:
-                print 'No password defined for privilege level %s' % dest_priv
+                print('No password defined for privilege level %s' % dest_priv)
                 try:
                     self.__passwords[dest_priv] = self.__get_new_password()
                     self.__dump_passwords();
-                    print 'Password set'
-                    print "Changed to privilege level %s..." % dest_priv
+                    print('Password set')
+                    print("Changed to privilege level %s..." % dest_priv)
                     self.set_privileges(dest_priv)
                     return
-                except InvalidPassword, e:
-                    print "Error: ", e
+                except InvalidPassword as e:
+                    print("Error: ", e)
                     return
             else:
                 if self.__passwords[dest_priv] == '':
-                    print "Changed to privilege level %s..." % dest_priv
+                    print("Changed to privilege level %s..." % dest_priv)
                     self.set_privileges(dest_priv)
                 else:
                     passwd = self.__get_password()
                     if passwd ==  self.__passwords[dest_priv] or passwd in self.__get_temp_passwords():
-                        print "Changed to privilege level %s..." % dest_priv
+                        print("Changed to privilege level %s..." % dest_priv)
                         self.set_privileges(dest_priv)
                     else:
-                        print "Invalid password"
+                        print("Invalid password")
         except:
-            print "Invalid password"
+            print("Invalid password")
 
     def __get_passfile_name(self):
         return  os.path.expanduser(self.__pass_file)
     def __get_privilegesfile_name(self):
         return  os.path.expanduser(self.__privileges_file)
-    
+
     def __get_password(self):
         '''Prompt the user for the password and return it'''
         # We import the module only if we really need a password entry
@@ -311,17 +311,17 @@ class CliFunctionsManager:
         # FIX-ME
         # We can't use the prompt of the getpass because if we have a output
         # active the prompt appear after the user enter the password
-        print "passwd: "
+        print("passwd: ")
         return getpass.getpass('')
 
     def __get_new_password(self):
-        '''Prompt the user for the password twice and return it if the 
+        '''Prompt the user for the password twice and return it if the
         passwords match, throw exception if not.'''
         # We import the module only if we really need a password entry
         import getpass
-        print "New password"
+        print("New password")
         passwd1 = self.__get_password()
-        print "Repeat the password"
+        print("Repeat the password")
         passwd2 = self.__get_password()
         if passwd1==passwd2:
             return passwd1
