@@ -212,11 +212,9 @@ class FilterOut:
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-    def flush():
-        self.__out.write("FLUSH")
-        self.__out.flush()
-        if self.__textline != '':
-            self.__out.write(self.__textline)
+    def flush(self):
+        if self.__text != '':
+            self.__out.write(self.__text)
             self.__out.flush()
             self.__text = ''
 
